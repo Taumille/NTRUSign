@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import copy
 
 
 class Polynome:
@@ -82,6 +83,19 @@ class Polynome:
                     Q.coeff[i+1] += 1
                     Q.coeff[i] = 0
         return Q
+
+def longDivide(A, B):
+    # Compute the division A = QB+R 
+    Q = Polynome(N=len(A))
+    R = copy.deepcopy(A)
+    for i in range(A.ord()-B.ord(), -1, -1):
+        Q.coeff[i] = R.coeff[B.ord()+i] / B.coeff[B.ord()]
+        for j in range(B.ord()+i, i-1, -1):
+            R.coeff[j] -= Q.coeff[i] * B.coeff[j-i]
+        
+
+    return (Q, R)
+                            
 
 
 def randomGenPoly(N=503, inP=False, modq=2**32-1):
