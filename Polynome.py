@@ -112,15 +112,13 @@ def randomGenPoly(N=503, inP=False, modq=2**32-1):
 
 
 if __name__ == "__main__":
-    P = Polynome(7)
-    P.coeff[5] = 2
-    P.coeff[4] = 3
-    P.coeff[1] = 2
-    P.coeff[0] = 4
-    S = Polynome(7)
-    S.coeff[0] = 1
-    S.coeff[2] = 3
+    P = Polynome(N=11)
+    P.coeff = np.array([-1, 1, 1, 0, -1, 0, 1, 0, 0, 1, -1])
 
-    (R, Q) = euclidDiv(P, S)
-    print(f"Q : {Q}")
-    print(f"R : {R}")
+    print(f"P : {P}")
+    Pinv = P.inv(3)
+    print(f"Inverse mod 3 : {Pinv}")
+    print(f"Verif : {P.star_multiply(Pinv,3)}")
+    print(f"Verif2 : {P*Pinv}")
+
+    # print(f"Inverse mod 32 : {P.inv(32)}")
