@@ -87,6 +87,95 @@ class Polynome:
         for k in range(self.ord() + 1):
             self.coeff[k] = self.coeff[k] % q
 
+def addP(P,Q):
+    n = deg(P)
+    m = deg(Q)
+    N = np.max([n,m])+1
+    P2 = np.zeros(N)
+    Q2 = np.zeros(N)
+    P2[0:n+1] = P[0:n+1]
+    Q2[0:m+1] = Q[0:m+1]
+    return P2+Q2
+
+def sousP(P,Q):
+    return addP(P, (-1)*Q)
+
+def prodP(P, Q): 
+    n = deg(P)
+    m = deg(Q)
+    s = np.zeros(m+n+1)
+    for i in range (n+1):
+        for j in range (m+1):
+            s[i+j] += P[i]*Q[j]
+    return s
+
+def estPasZero(P):
+    return np.sum(P!=0)>0
+
+def xgcd(a, b):
+    """return (g, x, y) such that a*x + b*y = g = gcd(a, b)"""
+    x0, x1, y0, y1 = 0, 1, 1, 0
+    while a != 0:
+        (q, a), b = divmod(b, a), a
+        y0, y1 = y1, y0 - q * y1
+        x0, x1 = x1, x0 - q * x1
+    return b, x0, y0
+
+def modinv(a, b):
+    """return x such that (x * a) % b == 1"""
+    g, x, _ = xgcd(a, b)
+    if g != 1:
+        raise Exception('gcd('+str(a)+', '+str(b)+') != 1')
+    return x % b
+
+def deg(P):
+    if np.sum(P!=0):
+        return np.max(np.nonzero(P))
+    else:
+        return 0
+
+def divP (P, Q, p): 
+    n = deg(P)
+    m = deg(Q)
+    D = np.zeros_like(P)
+    Temp = np.zeros_like(P)
+    while n>=m and estPasZero(P):
+        t = P[n]*modinv(Q[m], p) % p
+        Temp[n-m] = t
+        D = D + Temp # ce par quoi on divise
+        P = sousP(P,prodP(Temp, Q)) %p
+        Temp[n-m]=0
+        n = deg(P)
+    return D, P
+
+def xgcdP(P, Q, p):
+    R = np.zeros_like(P)
+    D = np.zeros_like(P)
+    x0 = np.zeros_like(P)
+    x1 = np.zeros_like(P)
+    y0 = np.zeros_like(P)
+    y1 = np.zeros_like(P)
+    x1[0]=1
+    y0[0]=1
+    R = np.copy(P)
+    while np.linalg.norm(R) != 0:
+        D, R = divP(P, Q, p)
+        P = np.copy(Q)
+        Q = np.copy(R)
+        y0, y1 = np.copy(y1), sousP(y0, prodP(D,y1)) %p
+        x0, x1 = np.copy(x1), sousP(x0, prodP(D,x1)) % p
+    a = modinv(P[0],p)  
+    return P, a*x0 %p, a*y0 %p
+
+def modinvP(P, N, p):
+    Q = np.zeros(N+1)
+    Q[N] = 1
+    Q[0] = -1
+    Q = Q%p
+    G, x, y = xgcdP(P, Q, p)
+    if deg(G)>=1:
+        raise Exception('Polynôme non inversible ')
+    return y
 
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
@@ -114,11 +203,12 @@ def randomGenPoly(N=503, inP=False, modq=2**32-1):
 if __name__ == "__main__":
     P = Polynome(N=11)
     P.coeff = np.array([-1, 1, 1, 0, -1, 0, 1, 0, 0, 1, -1])
+    
+    for k in range(len(P)):
+        P.coeff %= 3
+    print(P.coeff)
 
-    print(f"P : {P}")
-    Pinv = P.inv(3)
-    print(f"Inverse mod 3 : {Pinv}")
-    print(f"Verif : {P.star_multiply(Pinv,3)}")
-    print(f"Verif2 : {P*Pinv}")
-
+    Pinv = modinvP(P.coeff, 11, 3)
+    print(Pinv.astype(int))
+    
     # print(f"Inverse mod 32 : {P.inv(32)}")
