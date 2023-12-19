@@ -11,6 +11,10 @@ class Polynome:
         if gen:
             self.coeff[o] = 1
 
+    def construct(self, coeff):
+        self.coeff = np.array(coeff)
+        self.N = len(self.coeff)
+
     def __len__(self):
         return self.N
 
@@ -31,28 +35,38 @@ class Polynome:
 
     def __sub__(self, other):
         tmp = Polynome(N=other.N, q=self.q)
-        tmp.coeff = -other.coeff % q
-        print(f"min :{tmp}")
+        tmp.coeff = -other.coeff % tmp.q
         return self + tmp
 
     def __mul__(self, other):
-        if isinstance(other, int):
+        if isinstance(other, int) or isinstance(other, np.int64):
             res = Polynome(N=self.N, q=self.q)
             res.coeff = self.coeff * other
             res.coeff % self.q
         elif isinstance(other, Polynome):
             res = Polynome(N=max(len(self), len(other)), q=self.q)
             for k in range(len(res)):
-                for i in range(len(res)):
+                for j in range(k+1):
                     try:
-                        if i <= k:
-                            res.coeff[k] += self.coeff[i] * other.coeff[k-i]
-                        else:
-                            res.coeff[k] += self.coeff[i] * other.coeff[len(self)+k-i]
-                        res.coeff[k] = res.coeff[k] % self.q
+                        res.coeff[k] += self.coeff[j]*other.coeff[k-j]
                     except IndexError:
-                        res.coeff[k] += 0
-                        print("Warning multiply error")
+                        pass
+        return res
+
+    def star_multiply(self, other, q=-1):
+        if q == -1:
+            q = self.q
+        res = Polynome(N=max(len(self), len(other)), q=q)
+        for k in range(len(res)):
+            for i in range(len(res)):
+                try:
+                    if i <= k:
+                        res.coeff[k] += self.coeff[i] * other.coeff[k-i]
+                    else:
+                        res.coeff[k] += self.coeff[i] * other.coeff[len(self)+k-i]
+                    res.coeff[k] = res.coeff[k] % q
+                except IndexError:
+                    res.coeff[k] += 0
 
         return res
 
@@ -73,29 +87,17 @@ class Polynome:
         for k in range(self.ord() + 1):
             self.coeff[k] = self.coeff[k] % q
 
-    def inv(self, q):
-        Q = Polynome(N=self.N, q=self.q)
-        id = Polynome(N=self.N, gen=True, o=0, q=self.q)
-        while np.linalg.norm((self*Q).coeff-id.coeff):
-            Q.coeff[0] += 1
-            for i in range(self.N):
-                if Q.coeff[i] == q:
-                    Q.coeff[i+1] += 1
-                    Q.coeff[i] = 0
-        return Q
 
-def longDivide(A, B):
-    # Compute the division A = QB+R 
-    Q = Polynome(N=len(A))
+def longDivide(A, B, q=503):
+    # Compute the division A = QB+R
+    Q = Polynome(N=len(A), q=q)
     R = copy.deepcopy(A)
     for i in range(A.ord()-B.ord(), -1, -1):
-        Q.coeff[i] = R.coeff[B.ord()+i] / B.coeff[B.ord()]
+        Q.coeff[i] = R.coeff[B.ord()+i] * pow(int(B.coeff[B.ord()]), -1, q)
         for j in range(B.ord()+i, i-1, -1):
-            R.coeff[j] -= Q.coeff[i] * B.coeff[j-i]
-        
+            R.coeff[j] = (R.coeff[j] - Q.coeff[i] * B.coeff[j-i]) % q
 
     return (Q, R)
-                            
 
 
 def randomGenPoly(N=503, inP=False, modq=2**32-1):
