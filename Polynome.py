@@ -73,7 +73,8 @@ class Polynome:
     def __str__(self):
         s = ""
         for i in range(len(self)-1, 0, -1):
-            s += str(self.coeff[i])+"X^"+str(i)+" + "
+            if self.coeff[i] != 0:
+                s += str(self.coeff[i])+"X^"+str(i)+" + "
         s += str(self.coeff[0])
         return s
 
