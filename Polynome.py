@@ -87,92 +87,39 @@ class Polynome:
         for k in range(self.ord() + 1):
             self.coeff[k] = self.coeff[k] % q
 
-def addP(P,Q):
-    n = deg(P)
-    m = deg(Q)
-    N = np.max([n,m])+1
-    P2 = np.zeros(N)
-    Q2 = np.zeros(N)
-    P2[0:n+1] = P[0:n+1]
-    Q2[0:m+1] = Q[0:m+1]
-    return P2+Q2
+    def inv(self, q):
+        N = len(self)
+        xp0 = Polynome(N=N, q=q)
+        xp1 = Polynome(N=N, q=q)
+        xp1.coeff[0] = 1
+        yp0 = Polynome(N=N, q=q)
+        yp0.coeff[0] = 1
+        yp1 = Polynome(N=N, q=q)
+        Rp = Polynome(N=N, q=q)
+        Rp.coeff = self.coeff
+        Pp = Polynome(N=len(P), q=q)
+        Pp.coeff = self.coeff
+        Qp = Polynome(N=N+1, q=q)
+        Qp.coeff[N] = 1
+        Qp.coeff[0] = -1 % q
+        while np.linalg.norm(Rp.coeff) != 0:
+            Dp, Rp = longDivide(Pp, Qp, q)
+            (Pp, Qp) = (Qp, Rp)
+            y0, y1 = yp1.coeff, (yp0 - Dp * yp1).coeff % q
+            x0, x1 = xp1.coeff, (xp0 - Dp * xp1).coeff % q
+            xp0.coeff = x0
+            xp1.coeff = x1
+            yp0.coeff = y0
+            yp1.coeff = y1
+        a = pow(int(Pp.coeff[0]), -1, q)
+        if Pp.ord() > 0:
+            raise Exception("Inversion Fails")
+        res = yp0 * a
+        res.N = N
+        res.coeff = res.coeff[:N]
+        res.coeff %= q
+        return res
 
-def sousP(P,Q):
-    return addP(P, (-1)*Q)
-
-def prodP(P, Q): 
-    n = deg(P)
-    m = deg(Q)
-    s = np.zeros(m+n+1)
-    for i in range (n+1):
-        for j in range (m+1):
-            s[i+j] += P[i]*Q[j]
-    return s
-
-def estPasZero(P):
-    return np.sum(P!=0)>0
-
-def xgcd(a, b):
-    """return (g, x, y) such that a*x + b*y = g = gcd(a, b)"""
-    x0, x1, y0, y1 = 0, 1, 1, 0
-    while a != 0:
-        (q, a), b = divmod(b, a), a
-        y0, y1 = y1, y0 - q * y1
-        x0, x1 = x1, x0 - q * x1
-    return b, x0, y0
-
-def deg(P):
-    if np.sum(P!=0):
-        return np.max(np.nonzero(P))
-    else:
-        return 0
-
-def divP (P, Q, p): 
-    n = deg(P)
-    m = deg(Q)
-    D = np.zeros_like(P)
-    Temp = np.zeros_like(P)
-    while n>=m and estPasZero(P):
-        t = P[n]*pow(int(Q[m]), -1, p) % p
-        Temp[n-m] = t
-        D = D + Temp # ce par quoi on divise
-        P = sousP(P,prodP(Temp, Q)) %p
-        Temp[n-m]=0
-        n = deg(P)
-    return D, P
-
-def xgcdP(P, p):
-    N = len(P)
-    Q = np.zeros(N+1)
-    Q[N] = 1
-    Q[0] = -1
-    Q = Q%p
-    R = np.zeros_like(P)
-    D = np.zeros_like(P)
-    x0 = np.zeros_like(P)
-    x1 = np.zeros_like(P)
-    y0 = np.zeros_like(P)
-    y1 = np.zeros_like(P)
-    x1[0]=1
-    y0[0]=1
-    R = np.copy(P)
-    while np.linalg.norm(R) != 0:
-        D, R = divP(P, Q, p)
-        P = np.copy(Q)
-        Q = np.copy(R)
-        y0, y1 = np.copy(y1), sousP(y0, prodP(D,y1)) %p
-        x0, x1 = np.copy(x1), sousP(x0, prodP(D,x1)) % p
-    a = pow(int(P[0]), -1, p)
-    if deg(P) > 0:
-        raise Exception("Inversion Fails")
-    return a*y0 % p
-
-def modinvP(P, N, p):
-    Q = np.zeros(N+1)
-    Q[N] = 1
-    Q[0] = -1
-    Q = Q%p
-    return xgcdP(P, Q, p)
 
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
@@ -205,7 +152,7 @@ if __name__ == "__main__":
         P.coeff %= 3
     print(P.coeff)
 
-    Pinv = xgcdP(P.coeff, 3)
-    print(Pinv.astype(int))
+    Pinv = P.inv(3)
+    print(Pinv)
     
     # print(f"Inverse mod 32 : {P.inv(32)}")
