@@ -121,13 +121,6 @@ def xgcd(a, b):
         x0, x1 = x1, x0 - q * x1
     return b, x0, y0
 
-def modinv(a, b):
-    """return x such that (x * a) % b == 1"""
-    g, x, _ = xgcd(a, b)
-    if g != 1:
-        raise Exception('gcd('+str(a)+', '+str(b)+') != 1')
-    return x % b
-
 def deg(P):
     if np.sum(P!=0):
         return np.max(np.nonzero(P))
@@ -140,7 +133,7 @@ def divP (P, Q, p):
     D = np.zeros_like(P)
     Temp = np.zeros_like(P)
     while n>=m and estPasZero(P):
-        t = P[n]*modinv(Q[m], p) % p
+        t = P[n]*pow(int(Q[m]), -1, p) % p
         Temp[n-m] = t
         D = D + Temp # ce par quoi on divise
         P = sousP(P,prodP(Temp, Q)) %p
@@ -148,7 +141,12 @@ def divP (P, Q, p):
         n = deg(P)
     return D, P
 
-def xgcdP(P, Q, p):
+def xgcdP(P, p):
+    N = len(P)
+    Q = np.zeros(N+1)
+    Q[N] = 1
+    Q[0] = -1
+    Q = Q%p
     R = np.zeros_like(P)
     D = np.zeros_like(P)
     x0 = np.zeros_like(P)
@@ -164,18 +162,17 @@ def xgcdP(P, Q, p):
         Q = np.copy(R)
         y0, y1 = np.copy(y1), sousP(y0, prodP(D,y1)) %p
         x0, x1 = np.copy(x1), sousP(x0, prodP(D,x1)) % p
-    a = modinv(P[0],p)  
-    return P, a*x0 %p, a*y0 %p
+    a = pow(int(P[0]), -1, p)
+    if deg(P) > 0:
+        raise Exception("Inversion Fails")
+    return a*y0 % p
 
 def modinvP(P, N, p):
     Q = np.zeros(N+1)
     Q[N] = 1
     Q[0] = -1
     Q = Q%p
-    G, x, y = xgcdP(P, Q, p)
-    if deg(G)>=1:
-        raise Exception('Polynôme non inversible ')
-    return y
+    return xgcdP(P, Q, p)
 
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
@@ -208,7 +205,7 @@ if __name__ == "__main__":
         P.coeff %= 3
     print(P.coeff)
 
-    Pinv = modinvP(P.coeff, 11, 3)
+    Pinv = xgcdP(P.coeff, 3)
     print(Pinv.astype(int))
     
     # print(f"Inverse mod 32 : {P.inv(32)}")
