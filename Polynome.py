@@ -85,8 +85,7 @@ class Polynome:
         return -1
 
     def mod(self, q):
-        for k in range(self.ord() + 1):
-            self.coeff[k] = self.coeff[k] % q
+        self.coeff %= q
 
     def inv(self, q):
         N = len(self)
