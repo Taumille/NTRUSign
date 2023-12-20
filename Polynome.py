@@ -150,12 +150,15 @@ def randomGenPoly(N=503, inP=False, modq=2**32-1):
 if __name__ == "__main__":
     P = Polynome(N=11)
     P.coeff = np.array([-1, 1, 1, 0, -1, 0, 1, 0, 0, 1, -1])
-    
-    for k in range(len(P)):
-        P.coeff %= 3
-    print(P.coeff)
+    P.mod(3)
+    print(f'P : {P}')
 
     Pinv = P.inv(3)
-    print(Pinv)
-    
-    # print(f"Inverse mod 32 : {P.inv(32)}")
+    print(f'Inverse modulo 3 : {Pinv}')
+    print(f'Test : p * Pinv = {P.star_multiply(Pinv, 3)}')
+    P.coeff = np.array([-1, 1, 1, 0, -1, 0, 1, 0, 0, 1, -1])
+    P.mod(2)
+    print(f'P : {P}')
+    Pinv = P.inv(2, 5)
+    print(f'Inverse modulo 32 : {Pinv}')
+    print(f'Test : p * Pinv = {P.star_multiply(Pinv, 32)}')
