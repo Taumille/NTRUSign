@@ -144,6 +144,13 @@ class Polynome:
         c.N = N
         c.coeff = c.coeff[:N]
 
+        """
+        If r>1 i.e. we're trying to calculate the inverse modulo p^r
+        with p prime and r an integer.
+        We use the strategy decribed on page 27 of "NTRU: A NEW HIGH SPEED
+        PUBLIC KEY CRYPTOSYSTEM" by Jeffrey HOPSTEIN, Jill PIPHER and
+        Joseph H. SILVERMAN.
+        """
         if r != 1:
             p = q
             Identity = Polynome(N=N, gen=True, o=0)
