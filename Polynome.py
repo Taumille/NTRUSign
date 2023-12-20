@@ -4,10 +4,9 @@ import copy
 
 
 class Polynome:
-    def __init__(self, N=503, gen=False, o=0, q=2**32):
+    def __init__(self, N=503, gen=False, o=0):
         self.coeff = np.array([0 for _ in range(0, N)])
         self.N = len(self.coeff)
-        self.q = q
         if gen:
             self.coeff[o] = 1
 
@@ -23,7 +22,7 @@ class Polynome:
 
         for k in range(min(len(self), len(other))):
             res.coeff[k] = self.coeff[k] + other.coeff[k]
-            res.coeff[k] = res.coeff[k] % self.q
+            res.coeff[k] = res.coeff[k]
 
         if min(len(self), len(other)) == len(self):
             for k in range(len(other), len(self)):
@@ -35,14 +34,13 @@ class Polynome:
 
     def __sub__(self, other):
         tmp = Polynome(N=other.N, q=self.q)
-        tmp.coeff = -other.coeff % tmp.q
+        tmp.coeff = -other.coeff
         return self + tmp
 
     def __mul__(self, other):
         if isinstance(other, int) or isinstance(other, np.int64):
             res = Polynome(N=self.N, q=self.q)
             res.coeff = self.coeff * other
-            res.coeff % self.q
         elif isinstance(other, Polynome):
             res = Polynome(N=max(len(self), len(other)), q=self.q)
             for k in range(len(res)):
@@ -64,7 +62,7 @@ class Polynome:
                         res.coeff[k] += self.coeff[i] * other.coeff[k-i]
                     else:
                         res.coeff[k] += self.coeff[i] * other.coeff[len(self)+k-i]
-                    res.coeff[k] = res.coeff[k] % q
+                    res.coeff[k] = res.coeff[k]
                 except IndexError:
                     res.coeff[k] += 0
 
