@@ -92,6 +92,12 @@ class Polynome:
     def mod(self, q):
         self.coeff %= q
 
+    def evaluate(self, x):
+        res = 0
+        for i in range(len(self)):
+            res += self.coeff[i] * x**i
+        return res
+
 
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
