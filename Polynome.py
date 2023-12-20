@@ -88,37 +88,54 @@ class Polynome:
         self.coeff %= q
 
     def inv(self, q):
+        """
+        Compute the inverse of self modulo the ideal (q^r, x^N-1)
+        This algorithm is an application of the
+        Extended Euclidean Algorithm
+        """
+
+        # Variable initialisation
         N = len(self)
+
         xp0 = Polynome(N=N, q=q)
         xp1 = Polynome(N=N, q=q)
         xp1.coeff[0] = 1
         yp0 = Polynome(N=N, q=q)
         yp0.coeff[0] = 1
         yp1 = Polynome(N=N, q=q)
-        Rp = Polynome(N=N, q=q)
-        Rp.coeff = self.coeff
-        Pp = Polynome(N=len(P), q=q)
-        Pp.coeff = self.coeff
-        Qp = Polynome(N=N+1, q=q)
-        Qp.coeff[N] = 1
-        Qp.coeff[0] = -1 % q
-        while np.linalg.norm(Rp.coeff) != 0:
-            Dp, Rp = longDivide(Pp, Qp, q)
-            (Pp, Qp) = (Qp, Rp)
-            y0, y1 = yp1.coeff, (yp0 - Dp * yp1).coeff % q
-            x0, x1 = xp1.coeff, (xp0 - Dp * xp1).coeff % q
-            xp0.coeff = x0
-            xp1.coeff = x1
-            yp0.coeff = y0
-            yp1.coeff = y1
-        a = pow(int(Pp.coeff[0]), -1, q)
-        if Pp.ord() > 0:
+
+        """
+        We will compute xp*A + yp*B = 1
+        As A is equivalent to 0 in this field
+        We will have B*yp = 1 i.e. yp=B^-1
+        """
+        B = Polynome(N=N, q=q)
+        B.coeff = self.coeff
+
+        R = Polynome(N=N, q=q)
+        R.coeff = self.coeff
+
+        A = Polynome(N=N+1, q=q)
+        A.coeff[N] = 1
+        A.coeff[0] = -1 % q
+
+        while np.linalg.norm(R.coeff) != 0:
+            # Process to polynomial Long Division B/A
+            Q, R = longDivide(B, A, q)
+            (B, A) = (A, R)
+            # Increment xp and yp according to EED
+            yp0.coeff, yp1.coeff = yp1.coeff, (yp0 - Q * yp1).coeff % q
+            xp0.coeff, xp1.coeff = xp1.coeff, (xp0 - Q * xp1).coeff % q
+
+        if B.ord() > 0:
             raise Exception("Inversion Fails")
-        res = yp0 * a
-        res.N = N
-        res.coeff = res.coeff[:N]
-        res.coeff %= q
-        return res
+        # Format the result
+        c = yp0 * pow(int(B.coeff[0]), -1, q)
+        c.mod(q)
+        # Truncate the result to ensure a length of N
+        c.N = N
+        c.coeff = c.coeff[:N]
+        return c
 
 
 def longDivide(A, B, q=503):
