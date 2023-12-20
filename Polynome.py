@@ -78,6 +78,14 @@ class Polynome:
         s += str(self.coeff[0])
         return s
 
+    def __truediv__(self, other):
+        if isinstance(other, int):
+            res = Polynome(N=self.N)
+            res.coeff = self.coeff // other
+            return res
+        else:
+            raise Exception(f"Can't divide polynome by {type(other)}")
+
     def ord(self):
         for i in range(1, self.N+1):
             if self.coeff[self.N-i] != 0:
@@ -87,7 +95,7 @@ class Polynome:
     def mod(self, q):
         self.coeff %= q
 
-    def inv(self, q):
+    def inv(self, q, r=1):
         """
         Compute the inverse of self modulo the ideal (q^r, x^N-1)
         This algorithm is an application of the
@@ -135,6 +143,17 @@ class Polynome:
         # Truncate the result to ensure a length of N
         c.N = N
         c.coeff = c.coeff[:N]
+
+        if r != 1:
+            p = q
+            Identity = Polynome(N=N, gen=True, o=0)
+            while p < q**r:
+                self.q = p**2
+                cp = (self.star_multiply(c, p**2) - Identity) / p
+                c.q = p**2
+                c = c - c.star_multiply(cp, p) * p
+                p = p**2
+            c.mod(q**r)
         return c
 
 
