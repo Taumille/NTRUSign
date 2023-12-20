@@ -28,6 +28,23 @@ class KeyPair:
         else:
             self.pub = None
             self.priv = None
+        self.p = p
+        self.q = q
+
+    def export(self, printk=True):
+        if self.pub is None:
+            print("No public key saved, please load or generate a public key")
+            return
+        s = "-----BEGIN NTRU PUBLIC KEY BLOCK-----\n\n"
+        for c in self.pub.coeff:
+            s += str(c) + "|"
+        s = s[:-1]
+        s += "\n=="+str(self.q)
+        s += "\n\n-----END NTRU PUBLIC KEY BLOCK-----"
+
+        if printk:
+            print(s)
+        return s
 
 
 if __name__ == "__main__":
@@ -35,5 +52,4 @@ if __name__ == "__main__":
     t = time.time()
     k = KeyPair(503, 2, (2, 8), gen=True)
     print(f"Time to calculate key : {int((time.time()-t)*100)/100}s")
-    print(f"Pub : ord({k.pub.ord()})")
-    print(f"Priv : (ord({k.priv[0].ord()}), ord({k.priv[1].ord()}))")
+    k.export()
