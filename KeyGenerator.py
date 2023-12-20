@@ -1,8 +1,9 @@
 import Polynome as pn
+import numpy as np
 
 
 class KeyPair:
-    def __init__(self, N, p, q, gen=False):
+    def __init__(self, N=503, p=2, q=(2, 7), gen=False):
         if gen:
             while True:
                 try:
