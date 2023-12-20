@@ -126,7 +126,10 @@ def longDivide(A, B, q=503):
     Q = Polynome(N=len(A), q=q)
     R = copy.deepcopy(A)
     for i in range(A.ord()-B.ord(), -1, -1):
-        Q.coeff[i] = R.coeff[B.ord()+i] * pow(int(B.coeff[B.ord()]), -1, q)
+        try:
+            Q.coeff[i] = R.coeff[B.ord()+i] * pow(int(B.coeff[B.ord()]), -1, q)
+        except ValueError:
+            raise Exception(f"Can't inverse {int(B.coeff[B.ord()])} in base {q}")
         for j in range(B.ord()+i, i-1, -1):
             R.coeff[j] = (R.coeff[j] - Q.coeff[i] * B.coeff[j-i]) % q
 
