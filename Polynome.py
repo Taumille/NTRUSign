@@ -179,14 +179,13 @@ def longDivide(A, B, q=503):
     return (Q, R)
 
 
-def randomGenPoly(N=503, inP=False, modq=2**32-1):
-    p = Polynome(N, q=modq)
-    for i in range(N):
-        p.coeff[i] = random.randint(-1, 1)
-    if inP:
-        # P equiv Q[X^N-1]
-        p.coeff[0] += p.coeff[-1]
-        p.coeff[-1] = 0
+def randomGenPoly(N=503, d=0):
+    p = Polynome(N, q=2)
+    ones_coeff = [k for k in range(N)]
+    while len(ones_coeff) > d:
+        ones_coeff.pop(np.random.randint(len(ones_coeff)))
+    for i in ones_coeff:
+        p.coeff[i] = 1
     return p
 
 
