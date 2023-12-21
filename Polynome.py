@@ -128,6 +128,27 @@ def modXnp1(f: Polynome, N):
     return res
 
 
+def N(f: Polynome):
+    """
+    Compute the field norm of f
+    """
+    # f0 is the list of even coefficient
+    f0 = Polynome(N=f.N//2)
+    for i in range(f.N//2):
+        f0.coeff[i] = f.coeff[2*i]
+    # f1 is the list of even coefficient
+    f1 = Polynome(N=f.N//2)
+    for i in range(f.N//2):
+        f1.coeff[i] = f.coeff[2*i+1]
+    f02 = modXnp1(f0*f0, f0.N)
+    f12 = modXnp1(f1*f1, f1.N)
+    xf12 = f12 * Polynome(N=f.N, gen=True, o=1)
+    Nf = f02 - xf12
+    Nf.N = f.N//2
+    Nf.coeff = Nf.coeff[:Nf.N]
+    return Nf
+
+
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
     Q = Polynome(N=len(A))
