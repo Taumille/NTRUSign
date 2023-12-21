@@ -17,7 +17,7 @@ class Polynome:
         return self.N
 
     def __add__(self, other):
-        res = Polynome(N=max(len(self), len(other)), q=self.q)
+        res = Polynome(N=max(len(self), len(other)))
 
         for k in range(min(len(self), len(other))):
             res.coeff[k] = self.coeff[k] + other.coeff[k]
@@ -32,16 +32,16 @@ class Polynome:
         return res
 
     def __sub__(self, other):
-        tmp = Polynome(N=other.N, q=self.q)
+        tmp = Polynome(N=other.N)
         tmp.coeff = -other.coeff
         return self + tmp
 
     def __mul__(self, other):
         if isinstance(other, int) or isinstance(other, np.int64):
-            res = Polynome(N=self.N, q=self.q)
+            res = Polynome(N=self.N)
             res.coeff = self.coeff * other
         elif isinstance(other, Polynome):
-            res = Polynome(N=max(len(self), len(other)), q=self.q)
+            res = Polynome(N=len(self) + len(other))
             for k in range(len(res)):
                 for j in range(k+1):
                     try:
@@ -52,8 +52,8 @@ class Polynome:
 
     def star_multiply(self, other, q=-1):
         if q == -1:
-            q = self.q
-        res = Polynome(N=max(len(self), len(other)), q=q)
+            q = 2**32
+        res = Polynome(N=max(len(self), len(other)))
         for k in range(len(res)):
             for i in range(len(res)):
                 try:
@@ -101,7 +101,7 @@ class Polynome:
 
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
-    Q = Polynome(N=len(A), q=q)
+    Q = Polynome(N=len(A))
     R = copy.deepcopy(A)
     for i in range(A.ord()-B.ord(), -1, -1):
         try:
@@ -115,7 +115,7 @@ def longDivide(A, B, q=503):
 
 
 def randomGenPoly(N=503, d=0):
-    p = Polynome(N, q=2)
+    p = Polynome(N)
     ones_coeff = [k for k in range(N)]
     while len(ones_coeff) > d:
         ones_coeff.pop(np.random.randint(len(ones_coeff)))
