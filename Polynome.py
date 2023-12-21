@@ -118,6 +118,16 @@ def xgcd(A, B):
         return (y, x-(a//b)*y, g)
 
 
+def modXnp1(f: Polynome, N):
+    """
+    Reduce f mod(X^n+1)
+    """
+    res = Polynome(N=N)
+    for i in range(N):
+        res.coeff[i] = f.coeff[i] - f.coeff[i+N]
+    return res
+
+
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
     Q = Polynome(N=len(A))
