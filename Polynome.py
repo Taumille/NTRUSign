@@ -99,6 +99,25 @@ class Polynome:
         return res
 
 
+def xgcd(A, B):
+    """
+    Compute the extended euclidean algorithm
+    on polynomial A and B of degree 0
+    """
+    if isinstance(A, Polynome) and isinstance(B, Polynome):
+        a = A.coeff[0]
+        b = B.coeff[0]
+    else:
+        a = A
+        b = B
+
+    if b == 0:
+        return (1, 0, A)
+    else:
+        (x, y, g) = xgcd(b, a % b)
+        return (y, x-(a//b)*y, g)
+
+
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
     Q = Polynome(N=len(A))
