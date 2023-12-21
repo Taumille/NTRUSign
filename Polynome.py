@@ -149,6 +149,38 @@ def N(f: Polynome):
     return Nf
 
 
+def NTRUSolve(n, q, f, g):
+    """
+    Compute F and G satisfying f*F+g*G=q
+    with f and g in Z[X]/(X^n+1)
+    """
+    if n == 1:
+        (u, v, gcdfg) = xgcd(f, g)
+        if gcdfg != 1:
+            raise Exception(f"GCD(f,g) = {gcdfg} not equal 1")
+            return
+        Identity = Polynome(N=1, gen=True, o=0)
+        (F, G) = (Identity*q*v, Identity*q*u)
+        return (F, G)
+    else:
+        fp = N(f)
+        gp = N(g)
+        (Fp, Gp) = NTRUSolve(n//2, q, fp, gp)
+        Fp2 = Polynome(N=Fp.N*2)
+        for i in range(Fp.N):
+            Fp2.coeff[i*2] = Fp.coeff[i]
+            if i != 0:
+                Fp2.coeff[i*2] *= -1
+        F = modXnp1(Fp2*g, n)
+
+        Gp2 = Polynome(N=Fp.N*2)
+        for i in range(Gp.N):
+            Gp2.coeff[i*2] = Gp.coeff[i]
+        G = modXnp1(Gp2*f, n)
+        #(F, G) = reduce(f, g, F, G)
+        return (F, G)
+
+
 def longDivide(A, B, q=503):
     # Compute the division A = QB+R
     Q = Polynome(N=len(A))
