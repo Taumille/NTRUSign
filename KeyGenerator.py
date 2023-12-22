@@ -25,7 +25,16 @@ def singleWorker(params):
 
 
 class KeyPair:
-    def __init__(self, N=256, df=128, dg=128, q=127, B=8, t='transpose', gen=False):
+    def __init__(self,
+                 N=256,
+                 df=128,
+                 dg=128,
+                 q=127,
+                 B=8,
+                 t='transpose',
+                 gen=False,
+                 name="User Name",
+                 email="user@example.com"):
         if gen:
             f = [None for _ in range(B+1)]
             fp = [None for _ in range(B+1)]
@@ -49,12 +58,15 @@ class KeyPair:
         self.q = q
         self.df = df
         self.dg = dg
+        self.name = name
+        self.email = email
 
     def export(self, printk=True):
         if self.pub is None:
             print("No public key saved, please load or generate a public key")
             return
-        s = "-----BEGIN NTRU PUBLIC KEY BLOCK-----\n\n"
+        s = "-----BEGIN NTRU PUBLIC KEY BLOCK-----\n"
+        s += self.name+"<"+self.email+">\n\n"
         for c in self.pub.coeff:
             s += str(c) + "|"
         s = s[:-1]
@@ -66,7 +78,19 @@ class KeyPair:
         return s
 
     def import_pub(self, s):
+        self.name = ""
+        self.email = ""
         cursor = 0
+        while s[cursor] != '\n':
+            cursor += 1
+        cursor += 1
+        while s[cursor] != '<':
+            self.name += s[cursor]
+            cursor += 1
+        cursor += 1
+        while s[cursor] != '>':
+            self.email += s[cursor]
+            cursor += 1
         for i in range(2):
             while (s[cursor] != '\n'):
                 cursor += 1
@@ -120,9 +144,10 @@ class KeyPair:
 if __name__ == "__main__":
     import time
     t = time.time()
-    k = KeyPair(503, 2, (2, 8), gen=True)
+    N = 32
+    k = KeyPair(N, 3*N//4, N//4, 5, 24, gen=True, name="Paul Martin", email="pmartin@email.fr")
     print(f"Time to calculate key : {int((time.time()-t)*100)/100}s")
-    s = k.export(False)
-    k2 = KeyPair(gen=False)
+    s = k.export(True)
+    k2 = KeyPair()
     k2.import_pub(s)
-    k2.export()
+    k2.export(True)
