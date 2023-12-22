@@ -1,37 +1,54 @@
 import Polynome as pn
 import numpy as np
+from multiprocessing import Pool
+
+
+def singleWorker(params):
+    N, df, dg, q, t = params
+    while True:
+        try:
+            ft = pn.randomGenPoly(N, df)
+            gt = pn.randomGenPoly(N, dg)
+
+            if t == 'transpose':
+                f = ft
+                fp = gt
+            elif t == 'standard':
+                (F, G) = pn.NTRUSolve(N, q, ft, gt)
+                f = ft
+                fp = F
+            h = (f.inv(q).star_multiply(fp)).mod(q)
+            break
+        except Exception:
+            pass
+    return (f, fp, h)
 
 
 class KeyPair:
-    def __init__(self, N=503, p=2, q=(2, 7), gen=False):
+    def __init__(self, N=256, df=128, dg=128, q=127, B=8, t='transpose', gen=False):
         if gen:
-            while True:
-                try:
-                    f = pn.randomGenPoly(N=N)
-                    bck = f.coeff
-                    f.mod(p)
-                    fp = f.inv(p)
-                    print("Found fp")
-                    f.coeff = bck
-                    f.mod(q[0])
-                    fq = f.inv(q[0], q[1])
-                    print("Found fq")
-                    break
-                except Exception:
-                    pass
-            g = pn.randomGenPoly(N=N)
+            f = [None for _ in range(B+1)]
+            fp = [None for _ in range(B+1)]
+            h = [None for _ in range(B+1)]
 
-            h = g * fq * p
-            h.mod(q[0]**q[1])
+            params = [(N, df, dg, q, t) for _ in range(B+1)]
+            with Pool(B) as p:
+                res = p.map(singleWorker, params)
 
-            self.pub = h
-            self.priv = (f, fp)
+            f = [r[0] for r in res]
+            fp = [r[1] for r in res]
+            h = [r[2] for r in res]
+
+            self.pub = h[0]
+            self.priv = (f, fp, h)
         else:
             self.pub = None
             self.priv = None
         self.N = N
-        self.p = p
+        self.B = B
         self.q = q
+        self.df = df
+        self.dg = dg
 
     def export(self, printk=True):
         if self.pub is None:
