@@ -58,7 +58,7 @@ class KeyPair:
         for c in self.pub.coeff:
             s += str(c) + "|"
         s = s[:-1]
-        s += "\n=="+str(self.q)
+        s += "\n=="+str(self.N)+"|"+str(self.B)+"|"+str(self.q)+"|"+str(self.df)+"|"+str(self.dg)
         s += "\n\n-----END NTRU PUBLIC KEY BLOCK-----"
 
         if printk:
