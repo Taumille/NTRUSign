@@ -274,17 +274,19 @@ def randomGenPoly(N=503, d=0):
 
 
 if __name__ == "__main__":
-    P = Polynome(N=11)
-    P.coeff = np.array([-1, 1, 1, 0, -1, 0, 1, 0, 0, 1, -1])
-    P.mod(3)
-    print(f'P : {P}')
+    while True:
+        try:
+            n = 16
+            q = 5
+            f = randomGenPoly(n, 7)
+            g = randomGenPoly(n, 7)
 
-    Pinv = P.inv(3)
-    print(f'Inverse modulo 3 : {Pinv}')
-    print(f'Test : p * Pinv = {P.star_multiply(Pinv, 3)}')
-    P.coeff = np.array([-1, 1, 1, 0, -1, 0, 1, 0, 0, 1, -1])
-    P.mod(2)
-    print(f'P : {P}')
-    Pinv = P.inv(2, 5)
-    print(f'Inverse modulo 32 : {Pinv}')
-    print(f'Test : p * Pinv = {P.star_multiply(Pinv, 32)}')
+            (F, G) = NTRUSolve(n, q, f, g)
+            break
+        except Exception:
+            print("Exception")
+    print(f'f={f}')
+    print(f'g={g}')
+    print(f'F={F}')
+    print(f'G={G}')
+    print(f'q = {modXnp1(f*G-g*F, n)} == {q}')
