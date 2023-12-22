@@ -50,9 +50,7 @@ class Polynome:
                         pass
         return res
 
-    def star_multiply(self, other, q=-1):
-        if q == -1:
-            q = 2**32
+    def star_multiply(self, other):
         res = Polynome(N=max(len(self), len(other)))
         for k in range(len(res)):
             for i in range(len(res)):
@@ -91,6 +89,7 @@ class Polynome:
 
     def mod(self, q):
         self.coeff %= q
+        return self
 
     def evaluate(self, x):
         res = 0
