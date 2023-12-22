@@ -83,23 +83,38 @@ class KeyPair:
         public_coeff.append(int(sn))
         sn = ""
 
-        q = [None, None]
-        cursor += 4
-        while s[cursor] != ',':
+        cursor += 3
+        while s[cursor] != '|':
             sn += s[cursor]
             cursor += 1
-        q[0] = int(sn)
+        self.N = int(sn)
         sn = ""
         cursor += 1
-        while s[cursor] != ')':
+        while s[cursor] != '|':
             sn += s[cursor]
             cursor += 1
-        q[1] = int(sn)
+        self.B = int(sn)
+        sn = ""
+        cursor += 1
+        while s[cursor] != '|':
+            sn += s[cursor]
+            cursor += 1
+        self.q = int(sn)
+        sn = ""
+        cursor += 1
+        while s[cursor] != '|':
+            sn += s[cursor]
+            cursor += 1
+        self.df = int(sn)
+        sn = ""
+        cursor += 1
+        while s[cursor] != '\n':
+            sn += s[cursor]
+            cursor += 1
+        self.dg = int(sn)
 
-        self.pub = pn.Polynome(N=len(public_coeff), q=q[0]**q[1])
+        self.pub = pn.Polynome(N=self.N)
         self.pub.coeff = np.array(public_coeff)
-        self.q = tuple(q)
-        self.N = self.pub.N
 
 
 if __name__ == "__main__":
