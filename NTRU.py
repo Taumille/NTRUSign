@@ -5,6 +5,10 @@ import numpy as np
 
 
 def convertToPolynome(s: bytes):
+    """
+    Convert the byte string to a polynomial
+    using its sha1.
+    """
     m = hashlib.sha1()
     m.update(s)
     m = m.hexdigest()
