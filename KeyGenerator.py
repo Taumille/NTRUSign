@@ -4,6 +4,10 @@ from multiprocessing import Pool
 
 
 def singleWorker(params):
+    """
+    A single function that can be executed in parallel to accelerate
+    Key creation
+    """
     N, df, dg, q, t = params
     while True:
         try:
@@ -35,6 +39,9 @@ class KeyPair:
                  gen=False,
                  name="User Name",
                  email="user@example.com"):
+        """
+        Create a key with the parameter passed to the constructor
+        """
         if gen:
             f = [None for _ in range(B+1)]
             fp = [None for _ in range(B+1)]
@@ -62,6 +69,10 @@ class KeyPair:
         self.email = email
 
     def export(self, printk=True):
+        """
+        Export the key in a readable format either by returning it to the
+        standard output or saving it in a string.
+        """
         if self.pub is None:
             print("No public key saved, please load or generate a public key")
             return
@@ -78,6 +89,9 @@ class KeyPair:
         return s
 
     def import_pub(self, s):
+        """
+        Import a key previously exported by the export method.
+        """
         self.name = ""
         self.email = ""
         cursor = 0

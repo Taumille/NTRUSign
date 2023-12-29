@@ -3,6 +3,14 @@ import copy
 
 
 class Polynome:
+    """
+    Generic class for manipulating polynomials
+
+    Constructor :
+        - Polynome(N) create a polynomial full of zeros and of size N
+        - Polynome(N, gen=True, o=k) create the polynomial X^k of size n
+    """
+
     def __init__(self, N=503, gen=False, o=0):
         self.coeff = np.array([0 for _ in range(0, N)])
         self.N = len(self.coeff)
@@ -10,13 +18,23 @@ class Polynome:
             self.coeff[o] = 1
 
     def construct(self, coeff):
+        """
+        Create a Polynome object from an array of coefficient
+        """
         self.coeff = np.array(coeff)
         self.N = len(self.coeff)
 
     def __len__(self):
+        """
+        Get the length of a polynomial
+        """
         return self.N
 
     def __add__(self, other):
+        """
+        Define a classical addition on two polynomials.
+        Entrance parameters aren't affected.
+        """
         res = Polynome(N=max(len(self), len(other)))
 
         for k in range(min(len(self), len(other))):
@@ -32,25 +50,42 @@ class Polynome:
         return res
 
     def __sub__(self, other):
+        """
+        Define a classical substraction on two polynomials.
+        Entrance parameters aren't affected.
+        """
         tmp = Polynome(N=other.N)
         tmp.coeff = -other.coeff
         return self + tmp
 
     def __mul__(self, other):
+        """
+        Define a classical multiplication on two polynomials or between
+        an int and a polynomial
+        Entrance parameters aren't affected.
+        """
         if isinstance(other, int) or isinstance(other, np.int64):
+            # If the other operand is an in (or a numpy int)
             res = Polynome(N=self.N)
             res.coeff = self.coeff * other
         elif isinstance(other, Polynome):
+            # If the other operand is a polynomial
             res = Polynome(N=len(self) + len(other))
             for k in range(len(res)):
                 for j in range(k+1):
                     try:
                         res.coeff[k] += self.coeff[j]*other.coeff[k-j]
                     except IndexError:
+                        # Polynomials have different sizes
                         pass
         return res
 
     def star_multiply(self, other):
+        """
+        Define the star multiplication from NTRU algorithms.
+        This is just a multiplication modulo X^n
+        Entrance parameters aren't affected.
+        """
         res = Polynome(N=max(len(self), len(other)))
         for k in range(len(res)):
             for i in range(len(res)):
@@ -66,14 +101,21 @@ class Polynome:
         return res
 
     def __str__(self):
+        """
+        This method is useful to print a polynomial in its common form
+        """
         s = ""
         for i in range(len(self)-1, 0, -1):
-            if self.coeff[i] != 0:
+            if self.coeff[i] != 0:  # Do not print null coefficient
                 s += str(self.coeff[i])+"X^"+str(i)+" + "
         s += str(self.coeff[0])
         return s
 
     def __truediv__(self, other):
+        """
+        Define an integer division by an integer
+        Entrance parameters aren't affected.
+        """
         if isinstance(other, int):
             res = Polynome(N=self.N)
             res.coeff = self.coeff // other
@@ -82,16 +124,26 @@ class Polynome:
             raise Exception(f"Can't divide polynome by {type(other)}")
 
     def ord(self):
+        """
+        Return the degree of the polynomial, i.e. the power of the highest
+        non-null coefficient.
+        """
         for i in range(1, self.N+1):
             if self.coeff[self.N-i] != 0:
                 return self.N-i
         return -1
 
     def mod(self, q):
+        """
+        Inject the polynomial in Z/qZ
+        """
         self.coeff %= q
         return self
 
     def evaluate(self, x):
+        """
+        Evaluate the polynomial in x, i.e. return P(x)
+        """
         res = 0
         for i in range(len(self)):
             res += self.coeff[i] * x**i
@@ -264,6 +316,9 @@ def longDivide(A, B, q=503):
 
 
 def randomGenPoly(N=503, d=0):
+    """
+    Generate a random binary polynomial of size N with d zero.
+    """
     p = Polynome(N)
     ones_coeff = [k for k in range(N)]
     while len(ones_coeff) > d:
