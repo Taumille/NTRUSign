@@ -154,6 +154,37 @@ class KeyPair:
         self.pub = pn.Polynome(N=self.N)
         self.pub.coeff = np.array(public_coeff)
 
+    def export_priv(self, printk=True):
+        if self.pub is None:
+            print("No public key saved, please load or generate a public key")
+            return
+        s = "-----BEGIN NTRU PRIVATE KEY BLOCK-----\n"
+        s += self.name+"<"+self.email+">\n\n"
+        for i in range(self.B):
+            for c in self.priv[0][i].coeff:
+                s += str(c)+"|"
+            s = s[:-1]
+            s += '\n'
+            s += "-\n"
+
+            for c in self.priv[1][i].coeff:
+                s += str(c)+"|"
+            s = s[:-1]
+            s += '\n'
+            s += "-\n"
+
+            for c in self.priv[2][i].coeff:
+                s += str(c)+"|"
+            s = s[:-1]
+            s += '\n'
+            s += "~"
+        s = s[:-1]
+        s += "\n\n-----END NTRU PRIVATE KEY BLOCK-----"
+        if printk:
+            print(s)
+        return s
+
+
 
 if __name__ == "__main__":
     import time
