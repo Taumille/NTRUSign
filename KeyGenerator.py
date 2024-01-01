@@ -182,6 +182,69 @@ class KeyPair:
             print(s)
         return s
 
+    def import_priv(self, s):
+        self.name = ""
+        self.email = ""
+        cursor = 0
+        while s[cursor] != '\n':
+            cursor += 1
+        cursor += 1
+        while s[cursor] != '<':
+            self.name += s[cursor]
+            cursor += 1
+        cursor += 1
+        while s[cursor] != '>':
+            self.email += s[cursor]
+            cursor += 1
+        for i in range(2):
+            while (s[cursor] != '\n'):
+                cursor += 1
+            cursor += 1
+        f = []
+        fp = []
+        h = []
+        sn = ""
+        while s[cursor] != '\n':
+            if s[cursor] == '|':
+                f.append(int(sn))
+                sn = ""
+            else:
+                sn += s[cursor]
+            cursor += 1
+        f.append(int(sn))
+        cursor += 1
+        sn = ""
+        while s[cursor] != '\n':
+            if s[cursor] == '|':
+                fp.append(int(sn))
+                sn = ""
+            else:
+                sn += s[cursor]
+            cursor += 1
+        fp.append(int(sn))
+        cursor += 1
+        sn = ""
+        while s[cursor] != '\n':
+            if s[cursor] == '|':
+                h.append(int(sn))
+                sn = ""
+            else:
+                sn += s[cursor]
+            cursor += 1
+        h.append(int(sn))
+        sn = ""
+        self.N = len(f)
+        F = pn.Polynome(N=self.N)
+        F.coeff = np.array(f)
+        Fp = pn.Polynome(N=self.N)
+        Fp.coeff = np.array(fp)
+        H = pn.Polynome(N=self.N)
+        H.coeff = np.array(h)
+
+        self.B = 1
+
+        self.priv = ([F], [Fp], [H])
+
 
 
 if __name__ == "__main__":
