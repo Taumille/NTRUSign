@@ -68,7 +68,7 @@ class KeyPair:
         self.name = name
         self.email = email
 
-    def export(self, printk=True):
+    def export_pub(self, printk=True):
         """
         Export the key in a readable format either by returning it to the
         standard output or saving it in a string.
