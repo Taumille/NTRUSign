@@ -20,6 +20,22 @@ def H(s: bytes):
     return p
 
 
+def NTRUNorm(P, Q, mod=(0, 0)):
+    """
+    Definition of a new norm which is the sum
+    of the norm of the coefficient of the two
+    polynomials
+    """
+    Pc, Qc = P.coeff, Q.coeff
+    if mod[0] != 0 and mod[0]:
+        q = abs(mod[0])
+        Pc = Pc - q * (np.min(Pc) // q)
+    if mod[1] != 0 and mod[1]:
+        q = abs(mod[0])
+        Qc = Qc - q * (np.min(Qc) // q)
+    return np.norm(Pc) + np.norm(Qc)
+
+
 if __name__ == "__main__":
     infile = open("Alice.pdf", "rb")
     data = infile.read()
