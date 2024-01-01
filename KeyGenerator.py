@@ -155,8 +155,8 @@ class KeyPair:
         self.pub.coeff = np.array(public_coeff)
 
     def export_priv(self, printk=True):
-        if self.pub is None:
-            print("No public key saved, please load or generate a public key")
+        if self.priv is None:
+            print("No priv key saved, please load or generate a public key")
             return
         s = "-----BEGIN NTRU PRIVATE KEY BLOCK-----\n"
         s += self.name+"<"+self.email+">\n\n"
