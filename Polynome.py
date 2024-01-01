@@ -64,7 +64,7 @@ class Polynome:
         an int and a polynomial
         Entrance parameters aren't affected.
         """
-        if isinstance(other, int) or isinstance(other, np.int64):
+        if isinstance(other, int) or isinstance(other, np.int64) or isinstance(other, float):
             # If the other operand is an in (or a numpy int)
             res = Polynome(N=self.N)
             res.coeff = self.coeff * other
