@@ -165,20 +165,18 @@ class KeyPair:
                 s += str(c)+"|"
             s = s[:-1]
             s += '\n'
-            s += "-\n"
 
             for c in self.priv[1][i].coeff:
                 s += str(c)+"|"
             s = s[:-1]
             s += '\n'
-            s += "-\n"
 
             for c in self.priv[2][i].coeff:
                 s += str(c)+"|"
             s = s[:-1]
             s += '\n'
             s += "~"
-        s = s[:-1]
+        s = s[:-2]
         s += "\n\n-----END NTRU PRIVATE KEY BLOCK-----"
         if printk:
             print(s)
