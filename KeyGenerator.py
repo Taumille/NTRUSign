@@ -1,41 +1,14 @@
 import Polynome as pn
 import numpy as np
-from multiprocessing import Pool
-
-
-def singleWorker(params):
-    """
-    A single function that can be executed in parallel to accelerate
-    Key creation
-    """
-    N, df, dg, q, t = params
-    while True:
-        try:
-            ft = pn.randomGenPoly(N, df)
-            gt = pn.randomGenPoly(N, dg)
-
-            if t == 'transpose':
-                f = ft
-                fp = gt
-            elif t == 'standard':
-                (F, G) = pn.NTRUSolve(N, q, ft, gt)
-                f = ft
-                fp = F
-            h = (f.inv(q).star_multiply(fp)).mod(q)
-            break
-        except Exception:
-            pass
-    return (f, fp, h)
 
 
 class KeyPair:
     def __init__(self,
                  N=256,
-                 df=128,
-                 dg=128,
+                 p=2,
                  q=127,
-                 B=8,
-                 t='transpose',
+                 d=128,
+                 Bk=8,
                  gen=False,
                  name="User Name",
                  email="user@example.com"):
@@ -43,28 +16,37 @@ class KeyPair:
         Create a key with the parameter passed to the constructor
         """
         if gen:
-            f = [None for _ in range(B+1)]
-            fp = [None for _ in range(B+1)]
-            h = [None for _ in range(B+1)]
+            # Find f that is inversible modulo q
+            while True:
+                try:
+                    f = pn.T(d, N)
+                    invf = f.inv(q)
+                    if pn.NormF(f) < Bk:
+                        break
+                except Exception:
+                    pass
+            # Find g that is inversible modulo p
+            while True:
+                try:
+                    g = pn.T(d, N)
+                    g.inv(p)
+                    if pn.NormF(g) < Bk:
+                        break
+                except Exception:
+                    pass
 
-            params = [(N, df, dg, q, t) for _ in range(B+1)]
-            with Pool(B) as p:
-                res = p.map(singleWorker, params)
+            # h = g/fp (mod q)
+            h = pn.modXnp1(g * invf, g.N)
+            for i in range(len(h)):
+                h.coeff[i] = pn.xgcd(h.coeff[i], q)[0]
 
-            f = [r[0] for r in res]
-            fp = [r[1] for r in res]
-            h = [r[2] for r in res]
+            self.pub = h
+            self.priv = (f*p, g)
 
-            self.pub = h[0]
-            self.priv = (f, fp, h)
-        else:
-            self.pub = None
-            self.priv = None
         self.N = N
-        self.B = B
+        self.Bk = Bk
         self.q = q
-        self.df = df
-        self.dg = dg
+        self.d = d
         self.name = name
         self.email = email
 
