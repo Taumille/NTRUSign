@@ -120,6 +120,10 @@ class Polynome:
             res = Polynome(N=self.N)
             res.coeff = self.coeff // other
             return res
+        elif isinstance(other, Polynome):
+            res = Polynome(N=self.N)
+            res.coeff = self.coeff/other.coeff
+            return res
         else:
             raise Exception(f"Can't divide polynome by {type(other)}")
 
