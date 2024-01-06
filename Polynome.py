@@ -329,6 +329,24 @@ def randomGenPoly(N=503, q=2):
     return p
 
 
+def T(d, N):
+    """
+    Generate a trinary polynomial with d+1 positive
+    coefficient and d negative coefficient
+    """
+    f = Polynome(N=N)
+    coeff = [k for k in range(N)]
+    while np.sum(f.coeff) == 0:
+        f.coeff = np.zeros(N)
+        for _ in range(d+1):
+            c = coeff.pop(np.random.randint(len(coeff)))
+            f.coeff[c] = 1
+        for _ in range(d):
+            c = coeff.pop(np.random.randint(len(coeff)))
+            f.coeff[c] = -1
+    return f
+
+
 if __name__ == "__main__":
     while True:
         try:
