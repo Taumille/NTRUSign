@@ -319,16 +319,13 @@ def longDivide(A, B, q=503):
     return (Q, R)
 
 
-def randomGenPoly(N=503, d=0):
+def randomGenPoly(N=503, q=2):
     """
     Generate a random binary polynomial of size N with d zero.
     """
     p = Polynome(N)
-    ones_coeff = [k for k in range(N)]
-    while len(ones_coeff) > d:
-        ones_coeff.pop(np.random.randint(len(ones_coeff)))
-    for i in ones_coeff:
-        p.coeff[i] = 1
+    sigma = 1.17 * np.sqrt(q / (2 * N))
+    p.coeff = np.random.normal(0, sigma, N)
     return p
 
 
