@@ -160,7 +160,7 @@ class KeyPair:
             return
         s = "-----BEGIN NTRU PRIVATE KEY BLOCK-----\n"
         s += self.name+"<"+self.email+">\n\n"
-        for i in range(self.B+1):
+        for i in range(self.B):
             for c in self.priv[0][i].coeff:
                 s += str(c)+"|"
             s = s[:-1]
@@ -175,7 +175,7 @@ class KeyPair:
                 s += str(c)+"|"
             s = s[:-1]
             s += '\n'
-            s += "~\n"
+            s += "~"
         s = s[:-2]
         s += "\n\n-----END NTRU PRIVATE KEY BLOCK-----"
         if printk:
@@ -204,56 +204,47 @@ class KeyPair:
         fp = []
         h = []
         sn = ""
-
-        self.priv = [[], [], []]
-
-        self.B = 0
-        while True:
-            while s[cursor] != '\n':
-                if s[cursor] == '|':
-                    f.append(int(sn))
-                    sn = ""
-                else:
-                    sn += s[cursor]
-                cursor += 1
-            f.append(int(sn))
+        while s[cursor] != '\n':
+            if s[cursor] == '|':
+                f.append(int(sn))
+                sn = ""
+            else:
+                sn += s[cursor]
             cursor += 1
-            sn = ""
-            while s[cursor] != '\n':
-                if s[cursor] == '|':
-                    fp.append(int(sn))
-                    sn = ""
-                else:
-                    sn += s[cursor]
-                cursor += 1
-            fp.append(int(sn))
+        f.append(int(sn))
+        cursor += 1
+        sn = ""
+        while s[cursor] != '\n':
+            if s[cursor] == '|':
+                fp.append(int(sn))
+                sn = ""
+            else:
+                sn += s[cursor]
             cursor += 1
-            sn = ""
-            while s[cursor] != '\n':
-                if s[cursor] == '|':
-                    h.append(int(sn))
-                    sn = ""
-                else:
-                    sn += s[cursor]
-                cursor += 1
-            h.append(int(sn))
-            sn = ""
-            self.N = len(f)
-            F = pn.Polynome(N=self.N)
-            F.coeff = np.array(f)
-            Fp = pn.Polynome(N=self.N)
-            Fp.coeff = np.array(fp)
-            H = pn.Polynome(N=self.N)
-            H.coeff = np.array(h)
-            self.priv[0].append(F)
-            self.priv[1].append(Fp)
-            self.priv[2].append(H)
+        fp.append(int(sn))
+        cursor += 1
+        sn = ""
+        while s[cursor] != '\n':
+            if s[cursor] == '|':
+                h.append(int(sn))
+                sn = ""
+            else:
+                sn += s[cursor]
+            cursor += 1
+        h.append(int(sn))
+        sn = ""
+        self.N = len(f)
+        F = pn.Polynome(N=self.N)
+        F.coeff = np.array(f)
+        Fp = pn.Polynome(N=self.N)
+        Fp.coeff = np.array(fp)
+        H = pn.Polynome(N=self.N)
+        H.coeff = np.array(h)
 
-            cursor += 1
-            if s[cursor] != '~':
-                break
-            cursor += 2
-            self.B += 1
+        self.B = 1
+
+        self.priv = ([F], [Fp], [H])
+
 
 
 if __name__ == "__main__":
