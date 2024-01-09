@@ -31,9 +31,9 @@ def singleWorker(params):
 class KeyPair:
     def __init__(self,
                  N=256,
+                 q=127,
                  df=128,
                  dg=128,
-                 q=127,
                  B=8,
                  t='transpose',
                  gen=False,
@@ -47,9 +47,17 @@ class KeyPair:
             fp = [None for _ in range(B+1)]
             h = [None for _ in range(B+1)]
 
-            params = [(N, df, dg, q, t) for _ in range(B+1)]
-            with Pool(B) as p:
-                res = p.map(singleWorker, params)
+            nproc = max(24, B+1)
+
+            params = [(N, df, dg, q, t) for _ in range(nproc)]
+            i = 0
+            res = []
+            with Pool(nproc) as p:
+                print(f"Launching {nproc} processes")
+                for i in p.imap_unordered(singleWorker, params, chunksize=1):
+                    res += [i]
+                    if len(res) >= B:
+                        break
 
             f = [r[0] for r in res]
             fp = [r[1] for r in res]
