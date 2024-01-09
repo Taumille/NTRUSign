@@ -153,14 +153,23 @@ class Polynome:
             res += self.coeff[i] * x**i
         return res
 
-    def inv(self, q, r=1):
+    def inv(self, p):
         """
-        Compute the inverse of self modulo the ideal (q^r, x^N-1)
+        Compute the inverse of self modulo the ideal (p, x^N-1)
+        with p=q^r
         This algorithm is an application of the
         Extended Euclidean Algorithm
         """
+        # Calculate if p is a power of 2
+        r = np.log2(p)
+        if r == np.floor(r):
+            q = 2
+        else:
+            raise Exception("p is not a power of 2")
+        print(f"{p} = 2^{r}")
 
         # Variable initialisation
+
         N = len(self)
 
         xp0 = Polynome(N=N)
