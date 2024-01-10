@@ -42,4 +42,17 @@ def NTRUNorm(P, Q, mod=(0, 0)):
 if __name__ == "__main__":
     infile = open("Alice.pdf", "rb")
     data = infile.read()
-    convertToPolynome(data)
+
+    # Load key
+    k = KeyPair()
+    infile = open("key_pub.asc", "r")
+    s = infile.read()
+    infile = open("key_priv.asc", "r")
+    s_priv = infile.read()
+    k.import_pub(s)
+    k.import_priv(s_priv)
+
+    print("Keys imported")
+
+    print(k.priv)
+    print(Signing(k=k, D=data, N_bound=310))
