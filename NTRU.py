@@ -30,13 +30,13 @@ def NTRUNorm(P, Q, mod=(0, 0)):
     Pc, Qc = P.coeff, Q.coeff
     if mod[0] != 0 and mod[0]:
         q = abs(mod[0])
-        minimum = Pc[np.argmin(abs(Pc))]
-        Pc = Pc - q * (minimum // q)
+        Pc = Pc % q
     if mod[1] != 0 and mod[1]:
         q = abs(mod[1])
-        minimum = Qc[np.argmin(abs(Qc))] // q
-        Qc = Qc - q * minimum
-    return np.linalg.norm(Pc) + np.linalg.norm(Qc)
+        Qc = Qc % q
+    res_p = np.sqrt(np.sum(np.square(Pc)) - np.square(np.sum(Pc))/len(Pc))
+    res_q = np.sqrt(np.sum(np.square(Qc)) - np.square(np.sum(Qc))/len(Qc))
+    return np.sqrt(res_p**2 + res_q**2)
 
 
 if __name__ == "__main__":
