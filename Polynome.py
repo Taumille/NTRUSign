@@ -163,11 +163,11 @@ class Polynome:
         """
         # Calculate if p is a power of 2
         r = np.log2(p)
-        if r == np.floor(r):
+        if r == int(r):
             q = 2
+            r = int(r)
         else:
             raise Exception("p is not a power of 2")
-        print(f"{p} = 2^{r}")
 
         # Variable initialisation
 
@@ -219,14 +219,14 @@ class Polynome:
         PUBLIC KEY CRYPTOSYSTEM" by Jeffrey HOPSTEIN, Jill PIPHER and
         Joseph H. SILVERMAN.
         """
-        if r != 1:
+        if r > 1:
             p = q
             Identity = Polynome(N=N, gen=True, o=0)
             while p < q**r:
                 self.q = p**2
-                cp = (self.star_multiply(c, p**2) - Identity) / p
+                cp = (self.star_multiply(c).mod(p**2) - Identity) / p
                 c.q = p**2
-                c = c - c.star_multiply(cp, p) * p
+                c = c - c.star_multiply(cp).mod(p) * p
                 p = p**2
             c.mod(q**r)
         return c
