@@ -170,7 +170,7 @@ class KeyPair:
             return
         s = "-----BEGIN NTRU PRIVATE KEY BLOCK-----\n"
         s += self.name+"<"+self.email+">\n\n"
-        for i in range(self.B):
+        for i in range(self.B+1):
             for c in self.priv[0][i].coeff:
                 s += str(c)+"|"
             s = s[:-1]
@@ -184,8 +184,7 @@ class KeyPair:
             for c in self.priv[2][i].coeff:
                 s += str(c)+"|"
             s = s[:-1]
-            s += '\n'
-            s += "~"
+            s += "\n~\n"
         s = s[:-2]
         s += "\n\n-----END NTRU PRIVATE KEY BLOCK-----"
         if printk:
@@ -261,9 +260,13 @@ if __name__ == "__main__":
     import time
     t = time.time()
     N = 32
-    k = KeyPair(N, 3*N//4, N//4, 5, 24, gen=True, name="Paul Martin", email="pmartin@email.fr")
+    k = KeyPair(251, 128, 73, 71, 1, gen=True, name="Paul Martin", email="pmartin@email.fr")
     print(f"Time to calculate key : {int((time.time()-t)*100)/100}s")
-    s = k.export(True)
-    k2 = KeyPair()
+    s = k.export_pub(True)
+    s2 = k.export_priv(True)
+
+    k2 = KeyPair(gen=False)
     k2.import_pub(s)
-    k2.export(True)
+    k2.import_priv(s2)
+    k2.export_pub(True)
+    k2.export_priv(True)
