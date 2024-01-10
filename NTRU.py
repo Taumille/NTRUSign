@@ -4,19 +4,20 @@ import hashlib
 import numpy as np
 
 
-def H(s: bytes):
+def H(s: bytes, N: int):
     """
     Convert the byte string to a polynomial
     using its sha1.
     """
-    m = hashlib.sha1()
-    m.update(s)
-    m = m.hexdigest()
-    N = 2**(int(np.ceil(np.log2(8*len(m)))))
+    h = hashlib.sha1()
+    i = 0
+    m = ""
+    while len(m) < N:
+        h.update(s+str(i).encode("ascii"))
+        m += h.hexdigest()
     p = Polynome(N=N)
-    m = ''.join(format(ord(x), 'b') for x in m)
     for i in range(len(m)):
-        p.coeff[i] = int(m[i])
+        p.coeff[i % N] += ord(m[i])
     return p
 
 
