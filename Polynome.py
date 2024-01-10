@@ -359,19 +359,14 @@ def T(d, N):
 
 
 if __name__ == "__main__":
+    modul = 128
     while True:
+        p = randomGenPoly(251, 73)
+        print(f"P = {p}")
         try:
-            n = 16
-            q = 5
-            f = randomGenPoly(n, 7)
-            g = randomGenPoly(n, 7)
-
-            (F, G) = NTRUSolve(n, q, f, g)
+            q = p.inv(modul)
+            print(f"P^-1 = {q}")
+            print(f"P*Q = {p.star_multiply(q).mod(modul)}")
             break
-        except Exception:
-            print("Exception")
-    print(f'f={f}')
-    print(f'g={g}')
-    print(f'F={F}')
-    print(f'G={G}')
-    print(f'q = {modXnp1(f*G-g*F, n)} == {q}')
+        except Exception as e:
+            print(e)
