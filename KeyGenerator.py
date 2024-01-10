@@ -23,7 +23,8 @@ def singleWorker(params):
                 fp = F
             h = (f.inv(q).star_multiply(fp)).mod(q)
             break
-        except Exception:
+        except Exception as e:
+            print(f"Exception {e} catched, retrying...")
             pass
     return (f, fp, h)
 
@@ -56,7 +57,8 @@ class KeyPair:
                 print(f"Launching {nproc} processes")
                 for i in p.imap_unordered(singleWorker, params, chunksize=1):
                     res += [i]
-                    if len(res) >= B:
+                    print(f"Got {len(res)} answers")
+                    if len(res) >= B+1:
                         break
 
             f = [r[0] for r in res]
