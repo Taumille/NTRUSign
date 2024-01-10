@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+import random
 
 
 class Polynome:
@@ -328,13 +329,14 @@ def longDivide(A, B, q=503):
     return (Q, R)
 
 
-def randomGenPoly(N=503, q=2):
+def randomGenPoly(N=503, d=2):
     """
     Generate a random binary polynomial of size N with d zero.
     """
     p = Polynome(N)
-    sigma = 1.17 * np.sqrt(q / (2 * N))
-    p.coeff = np.random.normal(0, sigma, N)
+    c = random.sample(range(N), d)
+    for e in c:
+        p.coeff[e] = 1
     return p
 
 
