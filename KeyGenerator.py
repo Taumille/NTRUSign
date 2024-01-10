@@ -192,6 +192,7 @@ class KeyPair:
         return s
 
     def import_priv(self, s):
+        self.priv = ([], [], [])
         self.name = ""
         self.email = ""
         cursor = 0
@@ -209,50 +210,62 @@ class KeyPair:
             while (s[cursor] != '\n'):
                 cursor += 1
             cursor += 1
-        f = []
-        fp = []
-        h = []
-        sn = ""
-        while s[cursor] != '\n':
-            if s[cursor] == '|':
-                f.append(int(sn))
-                sn = ""
-            else:
-                sn += s[cursor]
+        self.B = 0
+        while True:
+            f = []
+            fp = []
+            h = []
+            sn = ""
+            while s[cursor] != '\n':
+                if s[cursor] == '|':
+                    f.append(int(sn))
+                    sn = ""
+                else:
+                    sn += s[cursor]
+                cursor += 1
+            f.append(int(sn))
             cursor += 1
-        f.append(int(sn))
-        cursor += 1
-        sn = ""
-        while s[cursor] != '\n':
-            if s[cursor] == '|':
-                fp.append(int(sn))
-                sn = ""
-            else:
-                sn += s[cursor]
+            sn = ""
+            while s[cursor] != '\n':
+                if s[cursor] == '|':
+                    fp.append(int(sn))
+                    sn = ""
+                else:
+                    sn += s[cursor]
+                cursor += 1
+            fp.append(int(sn))
             cursor += 1
-        fp.append(int(sn))
-        cursor += 1
-        sn = ""
-        while s[cursor] != '\n':
-            if s[cursor] == '|':
-                h.append(int(sn))
-                sn = ""
-            else:
-                sn += s[cursor]
-            cursor += 1
-        h.append(int(sn))
-        sn = ""
-        self.N = len(f)
-        F = pn.Polynome(N=self.N)
-        F.coeff = np.array(f)
-        Fp = pn.Polynome(N=self.N)
-        Fp.coeff = np.array(fp)
-        H = pn.Polynome(N=self.N)
-        H.coeff = np.array(h)
+            sn = ""
+            while s[cursor] != '\n':
+                if s[cursor] == '|':
+                    h.append(int(sn))
+                    sn = ""
+                else:
+                    sn += s[cursor]
+                cursor += 1
+            h.append(int(sn))
+            sn = ""
 
-        self.B = 1
+            self.N = len(f)
 
-        self.priv = ([F], [Fp], [H])
+            F = pn.Polynome(N=self.N)
+            F.coeff = np.array(f)
+            Fp = pn.Polynome(N=self.N)
+            Fp.coeff = np.array(fp)
+            H = pn.Polynome(N=self.N)
+            H.coeff = np.array(h)
+
+            self.priv[0].append(F)
+            self.priv[1].append(Fp)
+            self.priv[2].append(H)
+
+            if s[cursor+1] != '~':
+                break
+
+            self.B += 1
+            cursor += 3
+
+
 
 
 
