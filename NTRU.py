@@ -68,7 +68,7 @@ def Signing(k: KeyPair, D, N_bound):
         s = s + s0
 
         # Check the signature
-        b = NTRUNorm(s, s.star_multiply(k.pub) - m0, (0, q))
+        b = NTRUNorm(s, s.star_multiply(k.priv[2][0]) - m0, (0, q))
         if b < N_bound:
             break
         elif b < l_b:
