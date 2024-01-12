@@ -185,7 +185,8 @@ class KeyPair:
                 s += str(c)+"|"
             s = s[:-1]
             s += "\n~\n"
-        s = s[:-2]
+        s = s[:-3]
+        s += "\n=="+str(self.q)
         s += "\n\n-----END NTRU PRIVATE KEY BLOCK-----"
         if printk:
             print(s)
@@ -265,8 +266,12 @@ class KeyPair:
             self.B += 1
             cursor += 3
 
+        cursor += 3
+        while s[cursor] != "\n":
+            sn += s[cursor]
+            cursor += 1
 
-
+        self.q = int(sn)
 
 
 if __name__ == "__main__":
