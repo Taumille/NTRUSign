@@ -39,6 +39,45 @@ def NTRUNorm(P, Q, mod=(0, 0)):
     return np.sqrt(res_p**2 + res_q**2)
 
 
+def Signing(k: KeyPair, D, N_bound):
+    r = 0
+    N = k.N
+    q = k.q
+    l_b = float('inf')
+    while True:
+        i = k.B
+        m0 = H(D+r.to_bytes(10, 'big'), k.N)
+        m = m0
+        s = Polynome(N=N)
+        si = Polynome(N=N)
+        x = Polynome(N=N)
+        y = Polynome(N=N)
+        while i >= 1:
+            # Perturb the point using the private lattice
+            x.coeff = np.floor((m.star_multiply(k.priv[1][i])*(-1/q)).coeff)
+            y.coeff = np.floor((m.star_multiply(k.priv[0][i])*(1/q)).coeff)
+
+            si = x.star_multiply(k.priv[0][i]) + y.star_multiply(k.priv[1][i])
+            m = si.star_multiply(k.priv[2][i] - k.priv[2][i-1]).mod(q)
+            s = s + si
+            i -= 1
+        # Sign the perturbed point using the public lattice
+        x.coeff = np.floor((m0.star_multiply(k.priv[1][0])*(-1/q)).coeff)
+        y.coeff = np.floor((m0.star_multiply(k.priv[0][0])*(1/q)).coeff)
+        s0 = x.star_multiply(k.priv[0][0]) + y.star_multiply(k.priv[1][0])
+        s = s + s0
+
+        # Check the signature
+        b = NTRUNorm(s, s.star_multiply(k.pub), (0, q))
+        if b < N_bound:
+            break
+        elif b < l_b:
+            l_b = b
+        r = r + 1
+
+    return (D, r, s)
+
+
 if __name__ == "__main__":
     infile = open("Alice.pdf", "rb")
     data = infile.read()
