@@ -4,6 +4,18 @@ import hashlib
 import numpy as np
 
 
+def pbar(max, min, curr):
+    percentage = int(30*(max - curr)/(max - min))
+    s = "("
+    for i in range(percentage):
+        s += "="
+    s += ">"
+    while len(s) < 30:
+        s += " "
+    s += ") " + str(int(percentage*100/30)) + "%"
+    print(s, end="\r")
+
+
 def H(s: bytes, N: int):
     """
     Convert the byte string to a polynomial
@@ -43,6 +55,7 @@ def Signing(k: KeyPair, D, N_bound):
     r = 0
     N = k.N
     q = k.q
+    max_b = None
     l_b = float('inf')
     while True:
         i = k.B
@@ -73,6 +86,10 @@ def Signing(k: KeyPair, D, N_bound):
             break
         elif b < l_b:
             l_b = b
+        if max_b is None:
+            max_b = l_b
+        else:
+            pbar(max_b, N_bound, l_b)
         r = r + 1
 
     return (D, r, s)
