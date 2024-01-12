@@ -78,6 +78,14 @@ def Signing(k: KeyPair, D, N_bound):
     return (D, r, s)
 
 
+def Verifying(D, r, s, N_bound, k: KeyPair):
+    m = H(D+r.to_bytes(10, 'big'), k.N)
+    b = NTRUNorm(s, s.star_multiply(k.pub) - m, (0, k.q))
+    if b < N_bound:
+        return True
+    return False
+
+
 if __name__ == "__main__":
     infile = open("Alice.pdf", "rb")
     data = infile.read()
