@@ -56,9 +56,11 @@ class KeyPair:
             with Pool(nproc) as p:
                 print(f"Launching {nproc} processes")
                 for i in p.imap_unordered(singleWorker, params, chunksize=1):
+                    # Every time a result is received it is put in res
                     res += [i]
-                    print(f"Got {len(res)} answers")
+                    print(f"Got {len(res)} answer(s) out of {B+1}")
                     if len(res) >= B+1:
+                        # If we have enough results the process are stopped
                         break
 
             f = [r[0] for r in res]
@@ -68,6 +70,10 @@ class KeyPair:
             self.pub = h[0]
             self.priv = (f, fp, h)
         else:
+            """
+            The key pair was not generated,
+            it will be totally or partially provided afterwards.
+            """
             self.pub = None
             self.priv = None
         self.N = N
@@ -80,11 +86,11 @@ class KeyPair:
 
     def export_pub(self, printk=True):
         """
-        Export the key in a readable format either by returning it to the
-        standard output or saving it in a string.
+        Export the public key in a readable format either by returning it to
+        the standard output or saving it in a string.
         """
         if self.pub is None:
-            print("No public key saved, please load or generate a public key")
+            print("No public key saved, please load or generate a key pair")
             return
         s = "-----BEGIN NTRU PUBLIC KEY BLOCK-----\n"
         s += self.name+"<"+self.email+">\n\n"
@@ -100,7 +106,7 @@ class KeyPair:
 
     def import_pub(self, s):
         """
-        Import a key previously exported by the export method.
+        Import a public key previously exported by the export method.
         """
         self.name = ""
         self.email = ""
@@ -165,8 +171,12 @@ class KeyPair:
         self.pub.coeff = np.array(public_coeff)
 
     def export_priv(self, printk=True):
+        """
+        Export the private key in a readable format either by returning it to
+        the standard output or saving it in a string.
+        """
         if self.priv is None:
-            print("No priv key saved, please load or generate a public key")
+            print("No priv key saved, please load or generate a key pair")
             return
         s = "-----BEGIN NTRU PRIVATE KEY BLOCK-----\n"
         s += self.name+"<"+self.email+">\n\n"
@@ -193,6 +203,9 @@ class KeyPair:
         return s
 
     def import_priv(self, s):
+        """
+        Import a private key previously exported by the export method.
+        """
         self.priv = ([], [], [])
         self.name = ""
         self.email = ""

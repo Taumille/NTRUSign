@@ -5,6 +5,9 @@ import numpy as np
 
 
 def pbar(max, min, curr):
+    """
+    Print a progress bar and with value curr between max and min
+    """
     percentage = int(30*(max - curr)/(max - min))
     s = "("
     for i in range(percentage):
@@ -52,6 +55,9 @@ def NTRUNorm(P, Q, mod=(0, 0)):
 
 
 def Signing(k: KeyPair, D, N_bound):
+    """
+    Sign the document D with the key k and boundary N_bound.
+    """
     r = 0
     N = k.N
     q = k.q
@@ -59,6 +65,8 @@ def Signing(k: KeyPair, D, N_bound):
     l_b = float('inf')
     while True:
         i = k.B
+
+        # m0 is the hash of the concatenation of H and r
         m0 = H(D+r.to_bytes(10, 'big'), k.N)
         m = m0
         s = Polynome(N=N)
@@ -91,11 +99,18 @@ def Signing(k: KeyPair, D, N_bound):
         else:
             pbar(max_b, N_bound, l_b)
         r = r + 1
+        s = np.zeros(N)
+        x = np.zeros(N)
+        y = np.zeros(N)
 
     return (D, r, s)
 
 
 def Verifying(D, r, s, N_bound, k: KeyPair):
+    """
+    Verify if the document D was signed by the
+    key k and boundary N_bound.
+    """
     m = H(D+r.to_bytes(10, 'big'), k.N)
     b = NTRUNorm(s, s.star_multiply(k.pub) - m, (0, k.q))
     if b < N_bound:
@@ -103,7 +118,11 @@ def Verifying(D, r, s, N_bound, k: KeyPair):
     return False
 
 
-def export_signature(r, s, N_Bound, printk: bool):
+def export_signature(r, s, N_Bound, prints: bool):
+    """
+    Export the signature to a string.
+    If prints is True, the signature will also be printed
+    """
     sig = "-----BEGIN NTRU SIGNATURE BLOCK-----\n"
     for c in s.coeff:
         sig += str(c) + "|"
@@ -112,12 +131,15 @@ def export_signature(r, s, N_Bound, printk: bool):
     sig += str(r) + ',' + str(N_Bound)
     sig += "\n-----END NTRU SIGNATURE BLOCK-----\n"
 
-    if printk:
+    if prints:
         print(sig)
     return sig
 
 
 def import_signature(sig: str):
+    """
+    Import the signature from a string.
+    """
     c = 0
     while sig[c] != '\n':
         c += 1
@@ -162,10 +184,16 @@ if __name__ == "__main__":
     s = infile.read()
     infile = open("key_priv.asc", "r")
     s_priv = infile.read()
-    k.import_pub(s)
+    # k.import_pub(s)
     k.import_priv(s_priv)
+    """
+    infile = open("Alice.ntru", "r")
+    signature_str = infile.read()
 
+    sig = import_signature(signature_str)
     print("Keys imported")
+    Verifying(data, sig[0], sig[1], sig[2], k)
+    """
 
-    print(k.priv)
-    print(Signing(k=k, D=data, N_bound=310))
+    sdoc = Signing(k=k, D=data, N_bound=555)
+    export_signature(sdoc[1], sdoc[2], 555, True)
