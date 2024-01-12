@@ -86,6 +86,55 @@ def Verifying(D, r, s, N_bound, k: KeyPair):
     return False
 
 
+def export_signature(r, s, N_Bound, printk: bool):
+    sig = "-----BEGIN NTRU SIGNATURE BLOCK-----\n"
+    for c in s.coeff:
+        sig += str(c) + "|"
+    sig = sig[:-1]
+    sig += "\n=="
+    sig += str(r) + ',' + str(N_Bound)
+    sig += "\n-----END NTRU SIGNATURE BLOCK-----\n"
+
+    if printk:
+        print(sig)
+    return sig
+
+
+def import_signature(sig: str):
+    c = 0
+    while sig[c] != '\n':
+        c += 1
+    c += 1
+    coeff = []
+    nb = ""
+    while sig[c] != '\n':
+        if sig[c] == "|":
+            coeff += [int(nb)]
+            nb = ""
+        else:
+            nb += sig[c]
+        c += 1
+    coeff += [int(nb)]
+    s = Polynome(N=len(coeff))
+    s.coeff = np.array(coeff)
+    nb = ""
+
+    c += 3
+    while sig[c] != ',':
+        nb += sig[c]
+        c += 1
+    r = int(nb)
+    nb = ""
+    c += 1
+
+    while sig[c] != '\n':
+        nb += sig[c]
+        c += 1
+    N_Bound = int(nb)
+
+    return r, s, N_Bound
+
+
 if __name__ == "__main__":
     infile = open("Alice.pdf", "rb")
     data = infile.read()
