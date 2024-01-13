@@ -1,6 +1,6 @@
 import Polynomial as pn
 import numpy as np
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 
 
 def singleWorker(params):
@@ -48,7 +48,12 @@ class KeyPair:
             fp = [None for _ in range(B+1)]
             h = [None for _ in range(B+1)]
 
-            nproc = max(24, B+1)
+            # The key generation will be separated between multiple processes.
+            # We try to put 2 process by CPU cores
+            try:
+                nproc = max(2 * cpu_count(), B+1)
+            except NotImplementedError:
+                nproc = B+1
 
             params = [(N, df, dg, q, t) for _ in range(nproc)]
             i = 0
