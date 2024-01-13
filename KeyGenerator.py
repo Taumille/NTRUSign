@@ -1,4 +1,4 @@
-import Polynome as pn
+import Polynomial as pn
 import numpy as np
 from multiprocessing import Pool
 
@@ -167,7 +167,7 @@ class KeyPair:
             cursor += 1
         self.dg = int(sn)
 
-        self.pub = pn.Polynome(N=self.N)
+        self.pub = pn.Polynomial(N=self.N)
         self.pub.coeff = np.array(public_coeff)
 
     def export_priv(self, printk=True):
@@ -262,11 +262,11 @@ class KeyPair:
 
             self.N = len(f)
 
-            F = pn.Polynome(N=self.N)
+            F = pn.Polynomial(N=self.N)
             F.coeff = np.array(f)
-            Fp = pn.Polynome(N=self.N)
+            Fp = pn.Polynomial(N=self.N)
             Fp.coeff = np.array(fp)
-            H = pn.Polynome(N=self.N)
+            H = pn.Polynomial(N=self.N)
             H.coeff = np.array(h)
 
             self.priv[0].append(F)

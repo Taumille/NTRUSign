@@ -1,5 +1,5 @@
 from KeyGenerator import KeyPair
-from Polynome import Polynome
+from Polynomial import Polynomial
 import hashlib
 import numpy as np
 
@@ -30,7 +30,7 @@ def H(s: bytes, N: int):
     while len(m) < N:
         h.update(s+str(i).encode("ascii"))
         m += h.hexdigest()
-    p = Polynome(N=N)
+    p = Polynomial(N=N)
     for i in range(len(m)):
         p.coeff[i % N] += ord(m[i])
     return p
@@ -63,16 +63,15 @@ def Signing(k: KeyPair, D, N_bound):
     q = k.q
     max_b = None
     l_b = float('inf')
+    s = Polynomial(N=N)
+    x = Polynomial(N=N)
+    y = Polynomial(N=N)
     while True:
         i = k.B
 
         # m0 is the hash of the concatenation of H and r
         m0 = H(D+r.to_bytes(10, 'big'), k.N)
         m = m0
-        s = Polynome(N=N)
-        si = Polynome(N=N)
-        x = Polynome(N=N)
-        y = Polynome(N=N)
         while i >= 1:
             # Perturb the point using the private lattice
             x.coeff = np.floor((m.star_multiply(k.priv[1][i])*(-1/q)).coeff)
@@ -99,9 +98,9 @@ def Signing(k: KeyPair, D, N_bound):
         else:
             pbar(max_b, N_bound, l_b)
         r = r + 1
-        s = np.zeros(N)
-        x = np.zeros(N)
-        y = np.zeros(N)
+        s.coeff = np.zeros(N)
+        x.coeff = np.zeros(N)
+        y.coeff = np.zeros(N)
 
     return (D, r, s)
 
@@ -154,7 +153,7 @@ def import_signature(sig: str):
             nb += sig[c]
         c += 1
     coeff += [int(nb)]
-    s = Polynome(N=len(coeff))
+    s = Polynomial(N=len(coeff))
     s.coeff = np.array(coeff)
     nb = ""
 

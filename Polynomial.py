@@ -1,15 +1,16 @@
 import numpy as np
 import copy
 import random
+from prime_constant import PRIMES_LIST
 
 
-class Polynome:
+class Polynomial:
     """
     Generic class for manipulating polynomials
 
     Constructor :
-        - Polynome(N) create a polynomial full of zeros and of size N
-        - Polynome(N, gen=True, o=k) create the polynomial X^k of size n
+        - Polynomial(N) create a polynomial full of zeros and of size N
+        - Polynomial(N, gen=True, o=k) create the polynomial X^k of size n
     """
 
     def __init__(self, N=503, gen=False, o=0):
@@ -20,7 +21,7 @@ class Polynome:
 
     def construct(self, coeff):
         """
-        Create a Polynome object from an array of coefficient
+        Create a Polynomial object from an array of coefficient
         """
         self.coeff = np.array(coeff)
         self.N = len(self.coeff)
@@ -36,7 +37,7 @@ class Polynome:
         Define a classical addition on two polynomials.
         Entrance parameters aren't affected.
         """
-        res = Polynome(N=max(len(self), len(other)))
+        res = Polynomial(N=max(len(self), len(other)))
 
         for k in range(min(len(self), len(other))):
             res.coeff[k] = self.coeff[k] + other.coeff[k]
@@ -55,7 +56,7 @@ class Polynome:
         Define a classical substraction on two polynomials.
         Entrance parameters aren't affected.
         """
-        tmp = Polynome(N=other.N)
+        tmp = Polynomial(N=other.N)
         tmp.coeff = -other.coeff
         return self + tmp
 
@@ -65,13 +66,16 @@ class Polynome:
         an int and a polynomial
         Entrance parameters aren't affected.
         """
-        if isinstance(other, int) or isinstance(other, np.int64) or isinstance(other, float):
-            # If the other operand is an in (or a numpy int)
-            res = Polynome(N=self.N)
+        if (isinstance(other, int) or
+                isinstance(other, np.int64) or
+                isinstance(other, float)):
+            # If the other operand is a number (int, float, np.int64)
+            res = Polynomial(N=self.N)
             res.coeff = self.coeff * other
-        elif isinstance(other, Polynome):
+
+        elif isinstance(other, Polynomial):
             # If the other operand is a polynomial
-            res = Polynome(N=len(self) + len(other))
+            res = Polynomial(N=len(self) + len(other))
             for k in range(len(res)):
                 for j in range(k+1):
                     try:
@@ -87,7 +91,7 @@ class Polynome:
         This is just a multiplication modulo X^n
         Entrance parameters aren't affected.
         """
-        res = Polynome(N=max(len(self), len(other)))
+        res = Polynomial(N=max(len(self), len(other)))
         for k in range(len(res)):
             for i in range(len(res)):
                 try:
@@ -97,6 +101,8 @@ class Polynome:
                         res.coeff[k] += self.coeff[i] * other.coeff[len(self)+k-i]
                     res.coeff[k] = res.coeff[k]
                 except IndexError:
+                    # In case of one polynomial
+                    # having a bigger degree than the other
                     res.coeff[k] += 0
 
         return res
@@ -104,6 +110,7 @@ class Polynome:
     def __str__(self):
         """
         This method is useful to print a polynomial in its common form
+        i.e. aX^n+bX^(n-1)...
         """
         s = ""
         for i in range(len(self)-1, 0, -1):
@@ -114,15 +121,19 @@ class Polynome:
 
     def __truediv__(self, other):
         """
-        Define an integer division by an integer
+        Define a polynomial division by an integer
+        or a polynomial.
         Entrance parameters aren't affected.
+
+        The polynomial division is the division of every coefficient
+        by the coefficient of the same degree in the other polynomial
         """
         if isinstance(other, int):
-            res = Polynome(N=self.N)
+            res = Polynomial(N=self.N)
             res.coeff = self.coeff // other
             return res
-        elif isinstance(other, Polynome):
-            res = Polynome(N=self.N)
+        elif isinstance(other, Polynomial):
+            res = Polynomial(N=self.N)
             res.coeff = self.coeff/other.coeff
             return res
         else:
@@ -131,7 +142,7 @@ class Polynome:
     def ord(self):
         """
         Return the degree of the polynomial, i.e. the power of the highest
-        non-null coefficient.
+        non-zero coefficient.
         """
         for i in range(1, self.N+1):
             if self.coeff[self.N-i] != 0:
@@ -141,6 +152,9 @@ class Polynome:
     def mod(self, q):
         """
         Inject the polynomial in Z/qZ
+        i.e. put its coefficients in [0;q[
+        by taking the rest of the euclidean
+        division by q
         """
         self.coeff %= q
         return self
@@ -161,37 +175,43 @@ class Polynome:
         This algorithm is an application of the
         Extended Euclidean Algorithm
         """
-        # Calculate if p is a power of 2
-        r = np.log2(p)
-        if r == int(r):
-            q = 2
-            r = int(r)
-        else:
-            raise Exception("p is not a power of 2")
+        # Calculate if p is a power of a prime
+        # i.e. if there is p1 prime where log(p)/log(p1) is integer
+        q = 0
+        logp = np.log(p)
+        for p1 in PRIMES_LIST:
+            if p1 == p:
+                (q, r) = (p, 1)
+                break
+            res = logp/np.log(p1)
+            if res == int(res):
+                (q, r) = (p1, int(res))
+        if q == 0:
+            raise Exception(f'{p} is not a power of a prime')
 
-        # Variable initialisation
+        # Variable initialization
 
         N = len(self)
 
-        xp0 = Polynome(N=N)
-        xp1 = Polynome(N=N)
+        xp0 = Polynomial(N=N)
+        xp1 = Polynomial(N=N)
         xp1.coeff[0] = 1
-        yp0 = Polynome(N=N)
+        yp0 = Polynomial(N=N)
         yp0.coeff[0] = 1
-        yp1 = Polynome(N=N)
+        yp1 = Polynomial(N=N)
 
         """
         We will compute xp*A + yp*B = 1
         As A is equivalent to 0 in this field
         We will have B*yp = 1 i.e. yp=B^-1
         """
-        B = Polynome(N=N)
+        B = Polynomial(N=N)
         B.coeff = self.coeff
 
-        R = Polynome(N=N)
+        R = Polynomial(N=N)
         R.coeff = self.coeff
 
-        A = Polynome(N=N+1)
+        A = Polynomial(N=N+1)
         A.coeff[N] = 1
         A.coeff[0] = -1 % q
 
@@ -221,7 +241,7 @@ class Polynome:
         """
         if r > 1:
             p = q
-            Identity = Polynome(N=N, gen=True, o=0)
+            Identity = Polynomial(N=N, gen=True, o=0)
             while p < q**r:
                 self.q = p**2
                 cp = (self.star_multiply(c).mod(p**2) - Identity) / p
@@ -237,7 +257,7 @@ def xgcd(A, B):
     Compute the extended euclidean algorithm
     on polynomial A and B of degree 0
     """
-    if isinstance(A, Polynome) and isinstance(B, Polynome):
+    if isinstance(A, Polynomial) and isinstance(B, Polynomial):
         a = A.coeff[0]
         b = B.coeff[0]
     else:
@@ -251,31 +271,31 @@ def xgcd(A, B):
         return (y, x-(a//b)*y, g)
 
 
-def modXnp1(f: Polynome, N):
+def modXnp1(f: Polynomial, N):
     """
     Reduce f mod(X^n+1)
     """
-    res = Polynome(N=N)
+    res = Polynomial(N=N)
     for i in range(N):
         res.coeff[i] = f.coeff[i] - f.coeff[i+N]
     return res
 
 
-def N(f: Polynome):
+def N(f: Polynomial):
     """
     Compute the field norm of f
     """
     # f0 is the list of even coefficient
-    f0 = Polynome(N=f.N//2)
+    f0 = Polynomial(N=f.N//2)
     for i in range(f.N//2):
         f0.coeff[i] = f.coeff[2*i]
     # f1 is the list of even coefficient
-    f1 = Polynome(N=f.N//2)
+    f1 = Polynomial(N=f.N//2)
     for i in range(f.N//2):
         f1.coeff[i] = f.coeff[2*i+1]
     f02 = modXnp1(f0*f0, f0.N)
     f12 = modXnp1(f1*f1, f1.N)
-    xf12 = f12 * Polynome(N=f.N, gen=True, o=1)
+    xf12 = f12 * Polynomial(N=f.N, gen=True, o=1)
     Nf = f02 - xf12
     Nf.N = f.N//2
     Nf.coeff = Nf.coeff[:Nf.N]
@@ -292,31 +312,34 @@ def NTRUSolve(n, q, f, g):
         if gcdfg != 1:
             raise Exception(f"GCD(f,g) = {gcdfg} not equal 1")
             return
-        Identity = Polynome(N=1, gen=True, o=0)
+        Identity = Polynomial(N=1, gen=True, o=0)
         (F, G) = (Identity*q*v, Identity*q*u)
         return (F, G)
     else:
         fp = N(f)
         gp = N(g)
         (Fp, Gp) = NTRUSolve(n//2, q, fp, gp)
-        Fp2 = Polynome(N=Fp.N*2)
+        Fp2 = Polynomial(N=Fp.N*2)
         for i in range(Fp.N):
             Fp2.coeff[i*2] = Fp.coeff[i]
             if i != 0:
                 Fp2.coeff[i*2] *= -1
         F = modXnp1(Fp2*g, n)
 
-        Gp2 = Polynome(N=Fp.N*2)
+        Gp2 = Polynomial(N=Fp.N*2)
         for i in range(Gp.N):
             Gp2.coeff[i*2] = Gp.coeff[i]
         G = modXnp1(Gp2*f, n)
-        #(F, G) = reduce(f, g, F, G)
+        # (F, G) = reduce(f, g, F, G)
         return (F, G)
 
 
 def longDivide(A, B, q=503):
-    # Compute the division A = QB+R
-    Q = Polynome(N=len(A))
+    """
+    Compute the polynomial division A = QB+R
+    and return (Q, R)
+    """
+    Q = Polynomial(N=len(A))
     R = copy.deepcopy(A)
     for i in range(A.ord()-B.ord(), -1, -1):
         try:
@@ -331,31 +354,14 @@ def longDivide(A, B, q=503):
 
 def randomGenPoly(N=503, d=2):
     """
-    Generate a random binary polynomial of size N with d zero.
+    Generate a random binary polynomial of size N with d 1
+    and (N-d) zeros.
     """
-    p = Polynome(N)
+    p = Polynomial(N)
     c = random.sample(range(N), d)
     for e in c:
         p.coeff[e] = 1
     return p
-
-
-def T(d, N):
-    """
-    Generate a trinary polynomial with d+1 positive
-    coefficient and d negative coefficient
-    """
-    f = Polynome(N=N)
-    coeff = [k for k in range(N)]
-    while np.sum(f.coeff) == 0:
-        f.coeff = np.zeros(N)
-        for _ in range(d+1):
-            c = coeff.pop(np.random.randint(len(coeff)))
-            f.coeff[c] = 1
-        for _ in range(d):
-            c = coeff.pop(np.random.randint(len(coeff)))
-            f.coeff[c] = -1
-    return f
 
 
 if __name__ == "__main__":
