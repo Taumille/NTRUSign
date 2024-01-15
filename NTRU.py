@@ -79,16 +79,16 @@ def signing_worker(params):
         m = m0
         while i >= 1:
             # Perturb the point using the private lattice
-            x.coeff = np.floor((m.star_multiply(k.priv[1][i])*(-1/q)).coeff)
-            y.coeff = np.floor((m.star_multiply(k.priv[0][i])*(1/q)).coeff)
+            x.coeff = np.fix((m.star_multiply(k.priv[1][i])*(-1/q)).coeff)
+            y.coeff = np.fix((m.star_multiply(k.priv[0][i])*(1/q)).coeff)
 
             si = x.star_multiply(k.priv[0][i]) + y.star_multiply(k.priv[1][i])
             m = si.star_multiply(k.priv[2][i] - k.priv[2][i-1]).mod(q)
             s = s + si
             i -= 1
         # Sign the perturbed point using the public lattice
-        x.coeff = np.floor((m0.star_multiply(k.priv[1][0])*(-1/q)).coeff)
-        y.coeff = np.floor((m0.star_multiply(k.priv[0][0])*(1/q)).coeff)
+        x.coeff = np.fix((m0.star_multiply(k.priv[1][0])*(-1/q)).coeff)
+        y.coeff = np.fix((m0.star_multiply(k.priv[0][0])*(1/q)).coeff)
         s0 = x.star_multiply(k.priv[0][0]) + y.star_multiply(k.priv[1][0])
         s = s + s0
 
