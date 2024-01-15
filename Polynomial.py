@@ -184,7 +184,7 @@ class Polynomial:
                 (q, r) = (p, 1)
                 break
             res = logp/np.log(p1)
-            if res == int(res):
+            if abs(res-np.round(res)) < 10**(-10):
                 (q, r) = (p1, int(res))
         if q == 0:
             raise Exception(f'{p} is not a power of a prime')
