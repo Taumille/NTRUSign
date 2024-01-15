@@ -21,7 +21,7 @@ def pbar(max, min, curr, i):
     s += ">"
     while len(s) < 30:
         s += " "
-    s += ") " + str(int(percentage*100/30)) + "%"
+    s += ") " + str(int(percentage*100/30)) + "% " + str(i) + " " + str(curr) + "      "
     print(s, end="\r")
 
 
@@ -66,7 +66,7 @@ def signing_worker(params):
     k, D, N_bound, r = params
     N = k.N
     q = k.q
-    max_b = None
+    max_b = 700
     l_b = float('inf')
     s = Polynomial(N=N)
     x = Polynomial(N=N)
@@ -98,10 +98,6 @@ def signing_worker(params):
             break
         elif b < l_b:
             l_b = b
-        if max_b is None:
-            max_b = l_b
-        else:
-            pbar(max_b, N_bound, l_b)
         r = r + nproc
         pbar(max_b, N_bound, l_b, r)
         s.coeff = np.zeros(N)
