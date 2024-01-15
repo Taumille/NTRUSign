@@ -1,10 +1,16 @@
 from KeyGenerator import KeyPair
 from Polynomial import Polynomial
+from multiprocessing import Pool, cpu_count
 import hashlib
 import numpy as np
 
 
-def pbar(max, min, curr):
+try:
+    nproc = 2 * cpu_count()
+except NotImplementedError:
+    nproc = 1
+
+def pbar(max, min, curr, i):
     """
     Print a progress bar and with value curr between max and min
     """
@@ -38,9 +44,8 @@ def H(s: bytes, N: int):
 
 def NTRUNorm(P, Q, mod=(0, 0)):
     """
-    Definition of a new norm which is the sum
-    of the norm of the coefficient of the two
-    polynomials
+    Definition of the Centered
+    Euclidean Norm
     """
     Pc, Qc = P.coeff, Q.coeff
     if mod[0] != 0 and mod[0]:
@@ -54,11 +59,11 @@ def NTRUNorm(P, Q, mod=(0, 0)):
     return np.sqrt(res_p**2 + res_q**2)
 
 
-def Signing(k: KeyPair, D, N_bound):
+def signing_worker(params):
     """
     Sign the document D with the key k and boundary N_bound.
     """
-    r = 0
+    k, D, N_bound, r = params
     N = k.N
     q = k.q
     max_b = None
@@ -97,11 +102,22 @@ def Signing(k: KeyPair, D, N_bound):
             max_b = l_b
         else:
             pbar(max_b, N_bound, l_b)
-        r = r + 1
+        r = r + nproc
+        pbar(max_b, N_bound, l_b, r)
         s.coeff = np.zeros(N)
         x.coeff = np.zeros(N)
         y.coeff = np.zeros(N)
 
+    return (D, r, s)
+
+
+def Signing(k: KeyPair, D, N_bound):
+    params = [(k, D, N_bound, i) for i in range(nproc)]
+    with Pool(nproc) as p:
+        print(f"Launching {nproc} process")
+        for res in p.imap_unordered(signing_worker, params, chunksize=1):
+            (D, r, s) = res
+            break
     return (D, r, s)
 
 
