@@ -10,7 +10,7 @@ try:
 except NotImplementedError:
     nproc = 1
 
-def pbar(max, min, curr, i):
+def pbar(max, min, curr, r):
     """
     Print a progress bar and with value curr between max and min
     """
@@ -21,7 +21,7 @@ def pbar(max, min, curr, i):
     s += ">"
     while len(s) < 30:
         s += " "
-    s += ") " + str(int(percentage*100/30)) + "% " + str(i) + " " + str(curr) + "      "
+    s += ") " + str(int(percentage*100/30)) + "% " + str(r) + " " + str(curr) + "      "
     print(s, end="\r")
 
 
