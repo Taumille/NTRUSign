@@ -3,6 +3,7 @@
 import sys
 import NTRU
 import KeyGenerator
+from time import time
 
 
 def help():
@@ -57,8 +58,10 @@ while i < len(sys.argv):
         infile = open(path, 'rb')
         doc_to_sign = infile.read()
 
+        t = time()
         (D, r, s) = NTRU.Signing(k, doc_to_sign, N_bound)
         sig = NTRU.export_signature(r, s, N_bound, False)
+        print(f"\nDocument signed in {int(100*(time()-t))/100}s")
 
         name = path.split('/')
         name[-1] += ".ntru"
@@ -96,10 +99,10 @@ while i < len(sys.argv):
         name = input("What's your name ? ")
         email = input("What's your email address ? ")
 
+        t = time()
         k = KeyGenerator.KeyPair(gen=True, name=name, email=email)
         s_pub = k.export_pub(False)
         s_priv = k.export_priv(False)
-
         outfile = open(filename+"_pub.asc", "w")
         outfile.write(s_pub)
         outfile.close()
@@ -107,8 +110,8 @@ while i < len(sys.argv):
         outfile = open(filename+"_priv.asc", "w")
         outfile.write(s_priv)
         outfile.close()
-        
-        print("Keys generated")
+
+        print(f'Keys generated as {filename} in {int(100*(time()-t))/100}')
 
     else:
         help()
