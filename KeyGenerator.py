@@ -31,7 +31,7 @@ def singleWorker(params):
 
 class KeyPair:
     def __init__(self,
-                 N=256,
+                 N=251,
                  q=128,
                  df=73,
                  dg=71,
