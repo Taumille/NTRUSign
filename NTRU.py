@@ -139,7 +139,7 @@ def export_signature(r, s, N_Bound, prints: bool):
         sig += str(c) + "|"
     sig = sig[:-1]
     sig += "\n=="
-    sig += str(r) + ',' + str(N_Bound)
+    sig += str(r)
     sig += "\n-----END NTRU SIGNATURE BLOCK-----\n"
 
     if prints:
@@ -168,21 +168,13 @@ def import_signature(sig: str):
     s = Polynomial(N=len(coeff))
     s.coeff = np.array(coeff)
     nb = ""
-
     c += 3
-    while sig[c] != ',':
-        nb += sig[c]
-        c += 1
-    r = int(nb)
-    nb = ""
-    c += 1
-
     while sig[c] != '\n':
         nb += sig[c]
         c += 1
-    N_Bound = int(nb)
+    r = int(nb)
 
-    return r, s, N_Bound
+    return r, s
 
 
 if __name__ == "__main__":

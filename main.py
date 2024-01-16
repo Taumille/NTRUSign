@@ -28,7 +28,7 @@ if len(sys.argv) == 1:
     help()
     exit(1)
 
-(N, q, df, dg, B, t, N_bound) = (251, 128, 73, 71, 1, 'transpose', 555)
+(N, q, df, dg, B, t, N_bound) = (251, 128, 73, 71, 1, 'transpose', 545)
 k = KeyGenerator.KeyPair()
 i = 1
 while i < len(sys.argv):
@@ -81,7 +81,7 @@ while i < len(sys.argv):
 
         infile = open(path+".ntru", 'r')
         signature_str = infile.read()
-        r, s, N_bound = NTRU.import_signature(signature_str)
+        r, s = NTRU.import_signature(signature_str)
 
         verif = NTRU.Verifying(doc_to_verify, r, s, N_bound, k)
         if verif:
